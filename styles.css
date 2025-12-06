@@ -2,7 +2,8 @@
 :root {
     --primary-color: #5d5dff; /* Azul/Violeta llamativo */
     --secondary-color: #26a69a; /* Turquesa moderno */
-    --signature-color: #ff5733; /* Color Naranja Coral para la firma */
+    --signature-color: #ff5733; 
+    --soft-title-color: #7f8c8d; /* Color gris suave para el título fijo */
     --background-light: #eef1f6;
     --text-dark: #2c3e50;
     --shadow-deep: 0 8px 25px rgba(0, 0, 0, 0.15);
@@ -10,12 +11,13 @@
 }
 
 body {
-    font-family: 'Open Sans', sans-serif;
+    font-family: 'Open Sans', sans-serif; 
     background-color: var(--background-light);
     color: var(--text-dark);
     margin: 0;
     padding: 20px 0;
     line-height: 1.6;
+    font-size: 1.1em;
 }
 
 /* --- CONTENEDOR PRINCIPAL TIPO PÁGINA --- */
@@ -29,19 +31,50 @@ body {
     border-top: 8px solid var(--primary-color); 
 }
 
+/* ---------------------------------------------------- */
+/* --- AJUSTE DEL TÍTULO PRINCIPAL (TRABAJO DE) --- */
+/* ---------------------------------------------------- */
+.title-container {
+    text-align: center; /* Centra el contenido */
+    margin-bottom: 30px; 
+}
+
+.main-title-label {
+    font-size: 1.2em; /* Letra más pequeña */
+    color: var(--soft-title-color); /* Color más suave (gris) */
+    text-transform: uppercase; 
+    letter-spacing: 2px;
+    margin: 0;
+    padding-bottom: 5px;
+    font-weight: 600;
+}
+
+.centered-title-input {
+    border: none;
+    border-bottom: 3px solid var(--primary-color); /* Línea inferior destacada */
+    text-align: center;
+    font-size: 2.0em; 
+    font-weight: 700;
+    width: 90%; 
+    padding: 5px 0;
+    margin-top: 5px;
+    color: var(--primary-color);
+    background-color: transparent;
+}
+
+.centered-title-input:focus {
+    outline: none;
+    border-bottom-color: var(--secondary-color);
+}
+/* ---------------------------------------------------- */
+/* --- FIN AJUSTE DEL TÍTULO PRINCIPAL --- */
+/* ---------------------------------------------------- */
+
 /* --- ESTILO DEL ENCABEZADO (HEADER) --- */
 .document-header {
     margin-bottom: 30px;
     padding-bottom: 25px;
     border-bottom: 2px solid var(--primary-color);
-}
-
-.document-header h1 {
-    font-size: 2.2em;
-    color: var(--primary-color);
-    text-align: center;
-    margin: 10px 0 25px 0;
-    font-weight: 700;
 }
 
 .document-header input[type="text"],
@@ -103,9 +136,9 @@ body {
 /* --- BARRA DE HERRAMIENTAS (TOOLBAR) --- */
 #toolbar {
     display: flex;
-    flex-wrap: wrap; /* Asegura responsividad */
+    flex-wrap: wrap; 
     gap: 8px;
-    margin-bottom: 20px; /* Mayor separación del contenido */
+    margin-bottom: 20px; 
     padding: 10px;
     border-radius: 8px;
     background-color: #ffffff;
@@ -138,7 +171,7 @@ body {
 }
 
 #clear-content-btn {
-    margin-left: auto; /* Empuja el botón a la derecha */
+    margin-left: auto; 
     background-color: #f8d7da !important;
     border-color: #f5c6cb !important;
     color: #721c24 !important;
@@ -149,7 +182,7 @@ body {
     color: white !important;
 }
 
-/* --- CONTENEDOR Y BLOQUES DE PÁGINAS --- */
+/* --- CONTENEDOR Y BLOQUES DE PÁGINAS (FLEXIBLE) --- */
 #pages-container {
     padding: 0;
 }
@@ -157,14 +190,13 @@ body {
 .page-block {
     min-height: 400px; 
     padding: 25px;
-    margin-bottom: 30px; /* Espacio entre bloques */
+    margin-bottom: 30px; 
     border: 1px solid #ddd;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); 
     background-color: #fff;
     font-size: 1.1em;
     position: relative;
-    /* Evita cortes extraños al imprimir */
     page-break-inside: avoid; 
 }
 
@@ -266,16 +298,41 @@ body {
         print-color-adjust: exact !important;
         -webkit-print-color-adjust: exact !important;
     }
+    
     .print-fixed-btn, #add-participant-btn, .participant-input .modern-btn, #toolbar, .delete-page-btn { display: none !important; }
     
-    .page-container { margin: 0; padding: 0; box-shadow: none; max-width: 100%; border: none; border-top: none !important; }
-    .page-block {
-        box-shadow: none !important;
-        border: none !important;
-        margin-bottom: 0; 
-        padding: 10px; /* Reducir padding para impresión */
+    .page-container { 
+        width: 100% !important; 
+        margin: 0 !important; 
+        padding: 20px !important; 
+        box-shadow: none;
+        border: none;
+        border-top: none !important;
     }
     
+    .page-block {
+        max-height: none !important;
+        overflow-y: visible !important;
+        box-shadow: none !important;
+        border: none !important;
+        margin-bottom: 0;
+        padding: 10px 0 !important; 
+    }
+    .page-block .editable-content {
+        min-height: 0 !important;
+    }
+    
+    /* Asegurar que el título de entrada se vea como texto al imprimir */
+    .centered-title-input {
+        border: none !important; 
+        color: black !important; /* Imprimir en negro o el color del texto normal */
+        background-color: transparent !important;
+        text-align: center;
+        width: auto !important;
+        padding: 0;
+        font-size: 1.5em;
+    }
+
     .document-header input { 
         border: none !important; 
         width: auto !important; 
@@ -287,4 +344,4 @@ body {
     .document-header { border-bottom: 1px solid #000; }
     
     .document-footer { border-top: 1px solid #000; }
-}
+    }
