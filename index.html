@@ -11,13 +11,13 @@
 
     <div class="page-container">
         <header class="document-header">
-            <h1>Taller de: <input type="text" placeholder="[Nombre del Taller/Trabajo]"></h1>
+            <h1>Taller de: <input type="text" id="header-taller" placeholder="[Nombre del Taller/Trabajo]"></h1>
             <div class="header-grid">
-                <p><strong>Fecha:</strong> <input type="date"></p>
-                <p><strong>Materia:</strong> <input type="text" placeholder="[Nombre de la Materia]"></p>
-                <p><strong>Carrera:</strong> <input type="text" placeholder="[Nombre de la Carrera]"></p>
-                <p><strong>Sede:</strong> <input type="text" placeholder="[Nombre de la Sede]"></p>
-                <p><strong>Jornada:</strong> <input type="text" placeholder="[Mañana/Tarde/Noche]"></p>
+                <p><strong>Fecha:</strong> <input type="date" id="header-fecha"></p>
+                <p><strong>Materia:</strong> <input type="text" id="header-materia" placeholder="[Nombre de la Materia]"></p>
+                <p><strong>Carrera:</strong> <input type="text" id="header-carrera" placeholder="[Nombre de la Carrera]"></p>
+                <p><strong>Sede:</strong> <input type="text" id="header-sede" placeholder="[Nombre de la Sede]"></p>
+                <p><strong>Jornada:</strong> <input type="text" id="header-jornada" placeholder="[Mañana/Tarde/Noche]"></p>
             </div>
             
             <div class="participants-section">
@@ -32,14 +32,15 @@
             <h2>Contenido del Trabajo</h2>
             
             <div id="toolbar">
+                <button id="add-page-btn" title="Añadir nueva página/sección">➕ Página</button>
                 <button id="select-all-btn" title="Seleccionar todo">A</button>
                 <button id="undo-btn" title="Deshacer">↩️</button>
                 <button id="redo-btn" title="Rehacer">↪️</button>
-                <button id="clear-content-btn" title="Borrar todo el contenido">🗑️ Borrar Contenido</button>
+                <button id="clear-content-btn" title="Borrar todo el contenido">🗑️ Borrar Todo</button>
             </div>
             
-            <div id="editor-area" contenteditable="true" placeholder="Pega aquí tu texto, imágenes, tablas o ecuaciones (¡funciona como un Word!).">
-            </div>
+            <div id="pages-container">
+                </div>
         </main>
         
         <footer class="document-footer">
