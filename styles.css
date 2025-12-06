@@ -2,6 +2,7 @@
 :root {
     --primary-color: #5d5dff; /* Azul/Violeta llamativo */
     --secondary-color: #26a69a; /* Turquesa moderno */
+    --signature-color: #ff5733; /* Color Naranja Coral para la firma */
     --background-light: #eef1f6;
     --text-dark: #2c3e50;
     --shadow-deep: 0 8px 25px rgba(0, 0, 0, 0.15);
@@ -9,24 +10,23 @@
 }
 
 body {
-    font-family: 'Open Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Open Sans', sans-serif;
     background-color: var(--background-light);
     color: var(--text-dark);
     margin: 0;
     padding: 20px 0;
     line-height: 1.6;
-    transition: background-color 0.3s;
 }
 
 /* --- CONTENEDOR PRINCIPAL TIPO PÁGINA --- */
 .page-container {
-    max-width: 900px; /* Aumentamos el ancho para un look más profesional */
+    max-width: 900px; 
     margin: 30px auto;
     background-color: #ffffff;
     padding: 30px;
     box-shadow: var(--shadow-deep);
     border-radius: 16px;
-    border-top: 8px solid var(--primary-color); /* Toque llamativo */
+    border-top: 8px solid var(--primary-color); 
 }
 
 /* --- ESTILO DEL ENCABEZADO (HEADER) --- */
@@ -44,18 +44,15 @@ body {
     font-weight: 700;
 }
 
-/* Campos de entrada del encabezado */
 .document-header input[type="text"],
 .document-header input[type="date"] {
     border: none;
     border-bottom: 2px solid #ccc;
     padding: 5px 0;
     font-weight: 600;
-    width: 95%; /* Asegura que ocupe casi todo el espacio disponible */
+    width: 95%; 
     margin-left: 5px;
     background-color: transparent;
-    transition: border-bottom-color 0.3s;
-    font-size: 1em;
 }
 
 .document-header input:focus {
@@ -63,57 +60,15 @@ body {
     border-bottom-color: var(--secondary-color);
 }
 
-.header-grid p {
-    margin: 5px 0;
-}
-
-/* Disposición en cuadrícula responsiva para la información del encabezado */
 .header-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsivo */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
     gap: 15px 25px;
     margin-bottom: 20px;
     font-size: 0.95em;
 }
 
-/* --- SECCIÓN DE PARTICIPANTES --- */
-.participants-section {
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px dashed #ddd;
-}
-
-.participants-section p strong {
-    color: var(--primary-color);
-}
-
-#participants-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 10px;
-}
-
-.participant-input {
-    display: flex;
-    align-items: center;
-    flex: 1 1 250px; /* Responsivo, cada input ocupa 250px mín */
-}
-
-.participant-input input {
-    flex-grow: 1;
-    border: 1px solid #ccc;
-    padding: 8px;
-    border-radius: 4px;
-    transition: border-color 0.3s;
-}
-
-.participant-input input:focus {
-    border-color: var(--secondary-color);
-}
-
-
-/* --- BOTONES MODERNOS Y LLAMATIVOS --- */
+/* --- BOTONES MODERNOS --- */
 .modern-btn {
     background-color: var(--secondary-color); 
     color: white;
@@ -132,26 +87,68 @@ body {
     transform: translateY(-1px);
 }
 
-/* Botón de eliminar participante */
+.participant-input {
+    display: flex;
+    align-items: center;
+    flex: 1 1 250px; 
+}
+
 .participant-input .modern-btn {
-    background-color: #dc3545; /* Rojo */
+    background-color: #dc3545; 
     font-size: 0.9em;
     padding: 5px 10px;
     box-shadow: none;
 }
-.participant-input .modern-btn:hover {
-    background-color: #c82333;
-    transform: none;
+
+/* --- BARRA DE HERRAMIENTAS (TOOLBAR) --- */
+#toolbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    box-shadow: var(--shadow-light);
 }
 
-/* --- ÁREA DE EDICIÓN DEL CONTENIDO (EDITOR) --- */
+#toolbar button {
+    background-color: var(--background-light);
+    color: var(--text-dark);
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: 600;
+    line-height: 1; 
+}
+
+#toolbar button:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+#clear-content-btn {
+    margin-left: auto; 
+    background-color: #f8d7da !important;
+    border-color: #f5c6cb !important;
+    color: #721c24 !important;
+}
+
+#clear-content-btn:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+/* --- ÁREA DE EDICIÓN DEL CONTENIDO --- */
 #editor-area {
     min-height: 500px;
     border: 1px solid #ddd;
     padding: 25px;
     border-radius: 8px;
     box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
-    transition: border-color 0.3s;
     background-color: #fff;
     font-size: 1.1em;
 }
@@ -159,7 +156,6 @@ body {
 #editor-area:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: inset 0 0 5px rgba(93, 93, 255, 0.3);
 }
 
 [contenteditable="true"]:empty:before{
@@ -170,7 +166,7 @@ body {
     display: block;
 }
 
-/* --- PIE DE PÁGINA (FOOTER) --- */
+/* --- PIE DE PÁGINA (FOOTER) - ESTILO BASE --- */
 .document-footer {
     text-align: center;
     margin-top: 40px;
@@ -180,6 +176,17 @@ body {
     color: #7f8c8d;
     text-transform: uppercase;
     letter-spacing: 1px;
+}
+
+/* --- ESTILO DE FIRMA LLAMATIVO --- */
+.document-footer .signature {
+    font-family: 'Dancing Script', cursive; /* Fuente Cursiva Estilo Firma */
+    font-size: 2.2em; /* Tamaño grande y llamativo */
+    font-weight: 700;
+    color: var(--signature-color); /* Color Naranja Coral vibrante */
+    text-transform: none; /* Mantener las mayúsculas/minúsculas originales */
+    letter-spacing: normal;
+    margin: 5px 0;
 }
 
 /* --- BOTÓN DE IMPRESIÓN FLOTANTE --- */
@@ -197,103 +204,31 @@ body {
     cursor: pointer;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     z-index: 1000;
-    transition: background-color 0.3s, transform 0.2s;
 }
-
-.print-fixed-btn:hover {
-    background-color: #4a4adf;
-    transform: scale(1.05);
-}
-
 
 /* ================================================= */
-/* --- RESPONSIVIDAD (Móviles) --- */
+/* --- RESPONSIVIDAD Y ESTILOS DE IMPRESIÓN --- */
 /* ================================================= */
 @media (max-width: 600px) {
-    body {
-        padding: 0;
-    }
-
-    .page-container {
-        margin: 0;
-        padding: 20px 15px;
-        border-radius: 0; /* Ocupa todo el ancho en móviles */
-        box-shadow: none;
-    }
-    
-    .document-header h1 {
-        font-size: 1.6em;
-    }
-
-    .header-grid {
-        /* En pantallas pequeñas, forzamos que todos los campos vayan en una columna */
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-
-    /* Reducir el tamaño del botón flotante */
-    .print-fixed-btn {
-        bottom: 15px;
-        right: 15px;
-        padding: 12px 20px;
-        font-size: 1em;
-    }
-    
-    #editor-area {
-        min-height: 300px;
-        padding: 15px;
-        font-size: 1em;
-    }
+    .page-container { margin: 0; padding: 20px 15px; border-radius: 0; box-shadow: none; }
+    .header-grid { grid-template-columns: 1fr; gap: 10px; }
+    .print-fixed-btn { bottom: 15px; right: 15px; padding: 12px 20px; font-size: 1em; }
+    #toolbar { padding: 8px; gap: 5px; flex-wrap: wrap; }
+    #toolbar button { padding: 6px 10px; font-size: 1em; }
 }
 
-
-/* ================================================= */
-/* --- ESTILOS DE IMPRESIÓN (PDF) --- */
-/* ================================================= */
 @media print {
-    body {
-        background-color: white;
-        padding: 0 !important;
-    }
-
-    /* Ocultar elementos de la interfaz */
-    .print-fixed-btn, #add-participant-btn, .participant-input .modern-btn {
-        display: none !important;
-    }
-
-    .page-container {
-        margin: 0;
-        padding: 0;
-        box-shadow: none;
-        max-width: 100%;
-        border: none;
-        border-top: none !important;
-    }
-
-    /* Limpiar la apariencia del encabezado para la impresión */
-    .document-header input {
-        border: none !important;
-        width: auto !important;
-        padding: 0 !important;
-        /* Asegura que los valores sean visibles */
-        content: attr(value);
-        display: inline-block;
-        font-weight: normal;
-        color: #000;
-    }
+    body { background-color: white; padding: 0 !important; }
+    .print-fixed-btn, #add-participant-btn, .participant-input .modern-btn, #toolbar { display: none !important; }
+    .page-container { margin: 0; padding: 0; box-shadow: none; max-width: 100%; border: none; border-top: none !important; }
+    .document-header input { border: none !important; width: auto !important; padding: 0 !important; content: attr(value); display: inline-block; font-weight: normal; color: #000; }
+    .document-header { border-bottom: 1px solid #000; }
+    #editor-area { border: none !important; box-shadow: none !important; min-height: auto; }
     
-    .document-header {
-        border-bottom: 1px solid #000; /* Línea negra clásica de impresión */
-    }
-
-    #editor-area {
-        border: none !important;
-        box-shadow: none !important;
-        min-height: auto;
-    }
-
-    .document-footer {
-        border-top: 1px solid #000;
-        color: #000;
+    .document-footer { border-top: 1px solid #000; color: #000; }
+    .document-footer .signature {
+        color: #000; /* Forzamos color negro para una impresión limpia */
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
 }
