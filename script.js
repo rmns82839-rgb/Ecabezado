@@ -1,53 +1,90 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Definiciones de elementos
     const participantsList = document.getElementById('participants-list');
     const addParticipantBtn = document.getElementById('add-participant-btn');
     const printBtn = document.getElementById('print-btn');
+    
+    // Definiciones de la Barra de Herramientas
+    const editorArea = document.getElementById('editor-area');
+    const selectAllBtn = document.getElementById('select-all-btn');
+    const undoBtn = document.getElementById('undo-btn');
+    const redoBtn = document.getElementById('redo-btn');
+    const clearContentBtn = document.getElementById('clear-content-btn');
 
-    // Función para añadir un campo de participante
+
+    // ===========================================
+    // LÓGICA DE PARTICIPANTES DINÁMICOS
+    // ===========================================
+    
     const addParticipantInput = () => {
-        // 1. Crear el contenedor del participante
         const participantWrapper = document.createElement('div');
         participantWrapper.classList.add('participant-input');
 
-        // 2. Crear el input
         const input = document.createElement('input');
         input.type = 'text';
         input.placeholder = 'Nombre del Integrante';
         input.name = 'participante';
 
-        // 3. Crear el botón de eliminar
         const removeBtn = document.createElement('button');
         removeBtn.textContent = 'x';
         removeBtn.classList.add('modern-btn');
-        removeBtn.style.backgroundColor = '#dc3545'; // Rojo para eliminar
-        removeBtn.style.marginLeft = '5px';
-        removeBtn.style.padding = '5px 10px';
+        // Estilos para el botón de eliminar
+        removeBtn.style.cssText = 'background-color: #dc3545; margin-left: 5px; padding: 5px 10px; font-size: 0.9em;';
 
-        // Lógica para eliminar el input
         removeBtn.addEventListener('click', (e) => {
-            e.preventDefault(); // Evita que el botón haga algo inesperado
+            e.preventDefault();
             participantsList.removeChild(participantWrapper);
         });
         
-        // 4. Adjuntar elementos
         participantWrapper.appendChild(input);
         participantWrapper.appendChild(removeBtn);
         participantsList.appendChild(participantWrapper);
     };
 
-    // Añadir el primer input al cargar
+    // Inicializar con un campo de participante
     addParticipantInput();
 
-    // Evento para el botón de añadir participante
+    // Evento para añadir participante
     addParticipantBtn.addEventListener('click', (e) => {
-        e.preventDefault(); // Evita que el botón intente enviar un formulario
+        e.preventDefault();
         addParticipantInput();
     });
 
-    // Evento para el botón de imprimir
+    // ===========================================
+    // LÓGICA DE LA BARRA DE HERRAMIENTAS
+    // ===========================================
+
+    // Seleccionar todo
+    selectAllBtn.addEventListener('click', () => {
+        editorArea.focus();
+        document.execCommand('selectAll', false, null);
+    });
+
+    // Deshacer (Undo)
+    undoBtn.addEventListener('click', () => {
+        document.execCommand('undo', false, null);
+    });
+
+    // Rehacer (Redo)
+    redoBtn.addEventListener('click', () => {
+        document.execCommand('redo', false, null);
+    });
+
+    // Borrar Contenido (limpia todo el editor)
+    clearContentBtn.addEventListener('click', () => {
+        if (confirm("⚠️ ¿Estás seguro de que deseas borrar TODO el contenido del trabajo? Esta acción es difícil de deshacer.")) {
+            editorArea.innerHTML = ''; 
+            editorArea.focus(); 
+        }
+    });
+
+    // ===========================================
+    // LÓGICA DE IMPRESIÓN
+    // ===========================================
+    
     printBtn.addEventListener('click', () => {
-        // window.print() abre el diálogo de impresión nativo del navegador.
-        // El navegador permite seleccionar 'Guardar como PDF'
+        // La función window.print() abre el diálogo de impresión nativo.
+        // El usuario debe seleccionar "Guardar como PDF" en su sistema.
         window.print();
     });
 });
