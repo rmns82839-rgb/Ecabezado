@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trabajo En PDF</title>
+    <title>Generador de Trabajos Moderno</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
@@ -11,7 +11,10 @@
 
     <div class="page-container">
         <header class="document-header">
-            <h1>Taller de: <input type="text" id="header-taller" placeholder="[Nombre del Taller/Trabajo]"></h1>
+            <div class="title-container">
+                <p class="main-title-label">TRABAJO DE</p>
+                <input type="text" id="header-taller" placeholder="[Nombre del Taller/Trabajo]" class="centered-title-input">
+            </div>
             <div class="header-grid">
                 <p><strong>Fecha:</strong> <input type="date" id="header-fecha"></p>
                 <p><strong>Materia:</strong> <input type="text" id="header-materia" placeholder="[Nombre de la Materia]"></p>
