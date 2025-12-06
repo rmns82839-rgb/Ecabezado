@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Trabajos Moderno</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="page-container">
+        <header class="document-header">
+            <h1>Taller de: <input type="text" placeholder="[Nombre del Taller/Trabajo]"></h1>
+            <div class="header-grid">
+                <p><strong>Fecha:</strong> <input type="date"></p>
+                <p><strong>Materia:</strong> <input type="text" placeholder="[Nombre de la Materia]"></p>
+                <p><strong>Carrera:</strong> <input type="text" placeholder="[Nombre de la Carrera]"></p>
+                <p><strong>Sede:</strong> <input type="text" placeholder="[Nombre de la Sede]"></p>
+                <p><strong>Jornada:</strong> <input type="text" placeholder="[Mañana/Tarde/Noche]"></p>
+            </div>
+            
+            <div class="participants-section">
+                <p><strong>Realizado por:</strong></p>
+                <div id="participants-list">
+                    </div>
+                <button id="add-participant-btn" class="modern-btn">+</button>
+            </div>
+        </header>
+
+        <main>
+            <h2>Contenido del Trabajo</h2>
+            <div id="editor-area" contenteditable="true" placeholder="Pega aquí tu texto, imágenes, tablas o ecuaciones (¡funciona como un Word!).">
+            </div>
+        </main>
+    </div>
+
+    <button id="print-btn" class="print-fixed-btn">🖨️ Imprimir a PDF</button>
+
+    <script src="script.js"></script>
+   
+   <footer class="document-footer">
+            <p>By IDaMAr</p>
+        </footer>
+    </div>
+
+    <button id="print-btn" class="print-fixed-btn">🖨️ Imprimir a PDF</button>
+
+    <script src="script.js"></script>
+</body>
+</html> 
+    
+</body>
+</html>
