@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio Matemático Pro - IDaMAr</title>
+    <link rel="stylesheet" href="math.css">
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="page-container math-mode">
+        <header class="document-header">
+            <img src="logo.jpg" alt="Logo IDaMAr" class="app-logo">
+            <div class="title-container">
+                <h1 class="math-title">EDITOR MATEMÁTICO PRO</h1>
+                <p class="subtitle">Iván David Montes Arrieta • Constructor de Matrices nxn</p>
+            </div>
+        </header>
+
+        <main>
+            <div class="matrix-builder">
+                <div class="builder-group">
+                    <label>Filas:</label>
+                    <select id="matrix-rows">
+                        <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option>
+                        <option value="4">4</option><option value="5">5</option>
+                    </select>
+                </div>
+                <div class="builder-group">
+                    <label>Columnas:</label>
+                    <select id="matrix-cols">
+                        <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option>
+                        <option value="4">4</option><option value="5">5</option>
+                    </select>
+                </div>
+                <button onclick="insertDynamicMatrix()" class="modern-btn insert-matrix-btn">➕ Insertar Matriz</button>
+            </div>
+
+            <div class="math-keyboard">
+                <button onclick="insertMath('\\frac{?}{?}')">➗ Fracción</button>
+                <button onclick="insertMath('\\sqrt{?}')">√ Raíz</button>
+                <button onclick="insertMath('\\int_{?}^{?}')">∫ Integral</button>
+                <button onclick="insertMath('?^{?}')">x² Potencia</button>
+                <button onclick="insertMath('\\pi')">π</button>
+                <button onclick="insertMath('\\alpha')">α</button>
+            </div>
+
+            <div class="split-editor">
+                <div class="editor-side">
+                    <div class="side-label">CÓDIGO (Rellena los ?)</div>
+                    <div id="math-input" contenteditable="true" placeholder="Escribe aquí..."></div>
+                </div>
+
+                <div class="preview-side">
+                    <div class="side-label">VISTA PREVIA (Hoja Milimetrada)</div>
+                    <div id="math-preview" class="grid-paper"></div>
+                </div>
+            </div>
+
+            <div class="button-toolbar">
+                <button id="undo-btn" class="modern-btn edit-btn">↩️ Deshacer</button>
+                <button id="redo-btn" class="modern-btn edit-btn">↪️ Rehacer</button>
+                <button id="clear-btn" class="modern-btn clear-btn">🗑️ Limpiar</button>
+                <button id="print-math-btn" class="modern-btn print-btn">🖨️ Imprimir PDF</button>
+                <button class="modern-btn back-btn" onclick="window.location.href='index.html'">🏠 Volver</button>
+            </div>
+        </main>
+
+        <footer class="document-footer">
+            <p class="signature">® By IDaMAr - Realizado por Iván David Montes Arrieta</p>
+        </footer>
+    </div>
+
+    <script src="math.js"></script>
+</body>
+</html>
