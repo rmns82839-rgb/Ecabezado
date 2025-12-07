@@ -7,19 +7,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const undoBtn = document.getElementById('undo-btn');
     const redoBtn = document.getElementById('redo-btn');
     const clearBtn = document.getElementById('clear-btn');
-    const printMathBtn = document.getElementById('print-math-btn'); // Nuevo: Botón de impresión
+    const printMathBtn = document.getElementById('print-math-btn');
 
     let renderTimer;
 
     // ===========================================
-    // RENDERIZADO AUTOMÁTICO (Original + Mejorado)
+    // RENDERIZADO AUTOMÁTICO (Optimizado para Matrices)
     // ===========================================
     const renderMath = () => {
         if (window.MathJax && mathInput && mathPreview) {
-            // Sincronizar texto del editor a la vista previa
-            mathPreview.innerHTML = mathInput.innerText;
+            /** * MEJORA CLAVE: Usamos innerHTML para el preview para mantener 
+             * la estructura de etiquetas si fuera necesario, o textContent 
+             * para evitar que el navegador limpie los saltos de línea \\ 
+             */
+            mathPreview.innerHTML = mathInput.innerHTML;
             
-            // Llamar a MathJax para procesar
             window.MathJax.typesetPromise([mathPreview])
                 .then(() => console.log("Renderizado Exitoso"))
                 .catch((err) => console.log("Error MathJax:", err));
@@ -35,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===========================================
-    // LÓGICA DE MATRICES NXN DINÁMICAS (Nuevo)
+    // LÓGICA DE MATRICES NXN DINÁMICAS
     // ===========================================
     window.insertDynamicMatrix = () => {
         const rows = document.getElementById('matrix-rows').value;
@@ -66,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===========================================
-    // ASIGNACIÓN DE EVENTOS CON SEGURIDAD (Original)
+    // ASIGNACIÓN DE EVENTOS
     // ===========================================
     if(mathInput) {
         mathInput.addEventListener('input', triggerAutoRender);
@@ -96,7 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Lógica para botón de impresión
     if(printMathBtn) {
         printMathBtn.addEventListener('click', () => {
             renderMath();
@@ -105,10 +106,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ===========================================
-    // PERSISTENCIA (Original + Mejorado)
+    // PERSISTENCIA MEJORADA (Mantiene filas de matriz)
     // ===========================================
     const saveToStorage = () => {
         if(mathInput) {
+            // Guardamos el HTML completo para no perder los saltos de línea \\
             localStorage.setItem('mathStorage', mathInput.innerHTML);
         }
     }
@@ -117,36 +119,52 @@ document.addEventListener('DOMContentLoaded', () => {
         const saved = localStorage.getItem('mathStorage');
         if (saved && mathInput) {
             mathInput.innerHTML = saved;
-            // Asegurar que el preview cargue antes de renderizar
-            mathPreview.innerHTML = mathInput.innerText;
+            // Sincronizamos con el preview usando innerHTML para mantener formato
+            mathPreview.innerHTML = saved;
             setTimeout(renderMath, 1000);
         }
     };
 
     loadFromStorage();
 });
-// Guardar contenido al escribir
-document.addEventListener('input', () => {
-    const content = document.getElementById('pages-container').innerHTML;
-    const headerData = {
-        taller: document.getElementById('header-taller').value,
-        materia: document.getElementById('header-materia').value
-        // Añade aquí los demás campos del header
-    };
-    localStorage.setItem('documentContent', content);
-    localStorage.setItem('headerData', JSON.stringify(headerData));
+
+// ===========================================
+// PERSISTENCIA DEL DOCUMENTO Y HEADER
+// ===========================================
+document.addEventListener('input', (e) => {
+    // Solo actuamos si existen los contenedores principales
+    const pagesContainer = document.getElementById('pages-container');
+    if (pagesContainer) {
+        const content = pagesContainer.innerHTML;
+        localStorage.setItem('documentContent', content);
+    }
+
+    const taller = document.getElementById('header-taller');
+    const materia = document.getElementById('header-materia');
+
+    if (taller && materia) {
+        const headerData = {
+            taller: taller.value,
+            materia: materia.value
+        };
+        localStorage.setItem('headerData', JSON.stringify(headerData));
+    }
 });
 
-// Recuperar contenido al cargar la página
 window.addEventListener('load', () => {
     const savedContent = localStorage.getItem('documentContent');
     const savedHeader = JSON.parse(localStorage.getItem('headerData'));
     
-    if (savedContent) {
-        document.getElementById('pages-container').innerHTML = savedContent;
+    const pagesContainer = document.getElementById('pages-container');
+    if (savedContent && pagesContainer) {
+        pagesContainer.innerHTML = savedContent;
     }
+
+    const taller = document.getElementById('header-taller');
+    const materia = document.getElementById('header-materia');
+
     if (savedHeader) {
-        document.getElementById('header-taller').value = savedHeader.taller || '';
-        document.getElementById('header-materia').value = savedHeader.materia || '';
+        if (taller) taller.value = savedHeader.taller || '';
+        if (materia) materia.value = savedHeader.materia || '';
     }
 });
