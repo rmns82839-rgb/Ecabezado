@@ -11,10 +11,15 @@
 
     <div class="page-container">
         <header class="document-header">
+            <div class="logo-container">
+                <img src="logo.jpg" alt="Logo" id="document-logo">
+            </div>
+
             <div class="title-container">
                 <p class="main-title-label">TRABAJO DE</p>
-                <input type="text" id="header-taller" placeholder="[Nombre del Taller/Trabajo]" class="centered-title-input">
+                <input type="text" id="header-taller" placeholder="[Nombre del Trabajo]" class="centered-title-input">
             </div>
+            
             <div class="header-grid">
                 <p><strong>Fecha:</strong> <input type="date" id="header-fecha"></p>
                 <p><strong>Materia:</strong> <input type="text" id="header-materia" placeholder="[Nombre de la Materia]"></p>
@@ -25,33 +30,42 @@
             
             <div class="participants-section">
                 <p><strong>Realizado por:</strong></p>
-                <div id="participants-list">
-                    </div>
+                <div id="participants-list"></div>
                 <button id="add-participant-btn" class="modern-btn">+</button>
             </div>
         </header>
 
         <main>
-            <h2>Contenido del Trabajo</h2>
-            
-            <div id="toolbar">
-                <button id="add-page-btn" title="Añadir nueva página/sección">➕ Página</button>
-                <button id="select-all-btn" title="Seleccionar todo">A</button>
-                <button id="undo-btn" title="Deshacer">↩️</button>
-                <button id="redo-btn" title="Rehacer">↪️</button>
-                <button id="clear-content-btn" title="Borrar todo el contenido">🗑️ Borrar Todo</button>
+            <div class="content-work-header">
+                <h2>Contenido del Trabajo</h2>
+                <div id="intro-area" contenteditable="true" placeholder="Escribe una breve introducción..."></div>
             </div>
             
-            <div id="pages-container">
+            <div id="toolbar">
+                <button id="switch-math-btn" onclick="window.location.href='math.html'">📐 Matemáticas</button>
+                <button id="add-page-btn">➕ Página</button>
+                <button id="select-all-btn">A</button>
+                
+                <div class="alignment-group">
+                    <button id="align-left-btn">⬅️</button>
+                    <button id="align-center-btn">↔️</button>
+                    <button id="align-right-btn">➡️</button>
                 </div>
+
+                <button id="undo-btn">↩️</button>
+                <button id="redo-btn">↪️</button>
+                <button id="clear-content-btn">🗑️ Limpiar</button>
+            </div>
+            
+            <div id="pages-container"></div>
         </main>
         
         <footer class="document-footer">
-            <p class="signature">By IDaMAr</p>
+            <p class="signature">® By IDaMAr</p>
         </footer>
     </div>
 
-    <button id="print-btn" class="print-fixed-btn">🖨️ Imprimir a PDF</button>
+    <button id="print-btn" class="print-fixed-btn">🖨️ Imprimir PDF</button>
 
     <script src="script.js"></script>
 </body>
