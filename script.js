@@ -1,5 +1,5 @@
 // =================================================================
-// CÓDIGO ACTUALIZADO PARA 'script.js'
+// CÓDIGO MEJORADO PARA 'script.js' - MANTENIENDO LÓGICA ORIGINAL
 // =================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Contenedores
     const pagesContainer = document.getElementById('pages-container');
     const participantsList = document.getElementById('participants-list');
+    const introArea = document.getElementById('intro-area'); // NUEVO: Área de introducción
 
     // Botones Principales
     const addPageBtn = document.getElementById('add-page-btn');
@@ -21,6 +22,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const undoBtn = document.getElementById('undo-btn');
     const redoBtn = document.getElementById('redo-btn');
     const clearContentBtn = document.getElementById('clear-content-btn');
+
+    // Botones de Alineación (NUEVOS)
+    const alignLeftBtn = document.getElementById('align-left-btn');
+    const alignCenterBtn = document.getElementById('align-center-btn');
+    const alignRightBtn = document.getElementById('align-right-btn');
 
     // Encabezado (para persistencia)
     const headerFields = [
@@ -49,6 +55,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // 3. Guardar participantes
         const participantNames = Array.from(participantsList.querySelectorAll('input[type="text"]')).map(input => input.value);
         localStorage.setItem('participants', JSON.stringify(participantNames));
+
+        // 4. Guardar Introducción (NUEVO)
+        if(introArea) {
+            localStorage.setItem('introContent', introArea.innerHTML);
+        }
     };
 
     const loadContent = () => {
@@ -76,10 +87,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (savedPagesData && savedPagesData.length > 0) {
             pagesContainer.innerHTML = '';
             savedPagesData.forEach(htmlContent => {
-                addPage(htmlContent); // Recrear la página con el contenido guardado
+                addPage(htmlContent); 
             });
         } else {
-            addPage(); // Si no hay datos guardados, crear una página inicial
+            addPage(); 
+        }
+
+        // 4. Cargar Introducción (NUEVO)
+        if(introArea) {
+            const savedIntro = localStorage.getItem('introContent');
+            if(savedIntro) introArea.innerHTML = savedIntro;
         }
     };
 
@@ -94,13 +111,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const contentDiv = document.createElement('div');
         contentDiv.className = 'editable-content';
         contentDiv.contentEditable = true;
-        contentDiv.setAttribute('placeholder', 'Escribe o pega aquí el contenido de esta sección/página...');
+        contentDiv.setAttribute('placeholder', 'Escribe o pega aquí el contenido...');
         contentDiv.innerHTML = initialHtml;
         
-        // Asignar evento de guardado
         contentDiv.addEventListener('input', saveContent);
 
-        // Botón de borrar esta página (Borrado Selectivo)
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = '❌ Borrar Página';
         deleteBtn.className = 'delete-page-btn';
@@ -116,7 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
         pageBlock.appendChild(contentDiv);
         pagesContainer.appendChild(pageBlock);
 
-        // Enfocar la nueva página si no es una carga inicial
         if (initialHtml === "") {
             contentDiv.focus();
         }
@@ -168,14 +182,17 @@ document.addEventListener('DOMContentLoaded', () => {
     headerFields.forEach(field => {
         field.addEventListener('input', saveContent);
     });
+
+    // NUEVO: Guardar intro cuando cambie
+    if(introArea) {
+        introArea.addEventListener('input', saveContent);
+    }
     
     // ===========================================
-    // LÓGICA DE LA BARRA DE HERRAMIENTAS (¡ARREGLADO!)
+    // LÓGICA DE LA BARRA DE HERRAMIENTAS
     // ===========================================
     
-    // Función genérica para ejecutar comandos de edición
     const executeCommand = (command) => {
-        // Ejecuta el comando en el elemento que tiene el foco
         document.execCommand(command, false, null);
     };
 
@@ -191,10 +208,15 @@ document.addEventListener('DOMContentLoaded', () => {
         executeCommand('redo');
     });
 
+    // LÓGICA DE ALINEACIÓN (NUEVO)
+    if(alignLeftBtn) alignLeftBtn.addEventListener('click', () => executeCommand('justifyLeft'));
+    if(alignCenterBtn) alignCenterBtn.addEventListener('click', () => executeCommand('justifyCenter'));
+    if(alignRightBtn) alignRightBtn.addEventListener('click', () => executeCommand('justifyRight'));
+
     clearContentBtn.addEventListener('click', () => {
         if (confirm("⚠️ ¿Estás seguro de que deseas borrar TODOS los bloques de contenido?")) {
             pagesContainer.innerHTML = ''; 
-            addPage(); // Deja una página inicial vacía
+            addPage(); 
             saveContent(); 
         }
     });
@@ -207,6 +229,5 @@ document.addEventListener('DOMContentLoaded', () => {
         window.print();
     });
     
-    // Cargar todos los datos guardados al iniciar
     loadContent(); 
 });
