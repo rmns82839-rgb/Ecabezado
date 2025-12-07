@@ -11,15 +11,7 @@
 
     <div class="page-container">
         <header class="document-header">
-            <div class="logo-container">
-                <img src="logo.jpg" alt="Logo" id="document-logo">
-            </div>
-
-            <div class="title-container">
-                <p class="main-title-label">TRABAJO DE</p>
-                <input type="text" id="header-taller" placeholder="[Nombre del Trabajo]" class="centered-title-input">
-            </div>
-            
+            <h1>Taller de: <input type="text" id="header-taller" placeholder="[Nombre del Taller/Trabajo]"></h1>
             <div class="header-grid">
                 <p><strong>Fecha:</strong> <input type="date" id="header-fecha"></p>
                 <p><strong>Materia:</strong> <input type="text" id="header-materia" placeholder="[Nombre de la Materia]"></p>
@@ -36,37 +28,56 @@
         </header>
 
         <main>
-            <div class="content-work-header">
-                <h2>Contenido del Trabajo</h2>
-                <div id="intro-area" contenteditable="true" placeholder="Escribe una breve introducción..."></div>
-            </div>
+            <h2>Contenido del Trabajo</h2>
             
-            <div id="toolbar">
-                <button id="switch-math-btn" onclick="window.location.href='math.html'">📐 Matemáticas</button>
-                <button onclick="window.location.href='graficador.html'" class="modern-btn" style="background: #26a69a;">📈 Graficador</button>
-                <button id="add-page-btn">➕ Página</button>
-                <button id="select-all-btn">A</button>
+            <div id="toolbar" class="accordion-toolbar">
+                <div id="drag-handle" class="handle" title="Arrastra desde aquí">🛠️</div>
                 
-                <div class="alignment-group">
-                    <button id="align-left-btn">⬅️</button>
-                    <button id="align-center-btn">↔️</button>
-                    <button id="align-right-btn">➡️</button>
-                </div>
+                <div class="accordion-scroll-container">
+                    <div class="accordion-content">
+                        <button id="add-page-btn" title="Añadir nueva página">➕ Página</button>
+                        <button id="select-all-btn" title="Seleccionar todo">A</button>
+                        
+                        <div class="divider"></div>
 
-                <button id="undo-btn">↩️</button>
-                <button id="redo-btn">↪️</button>
-                <button id="clear-content-btn">🗑️ Limpiar</button>
+                        <button id="align-left-btn" title="Alinear izquierda">⬅️</button>
+                        <button id="align-center-btn" title="Centrar">↔️</button>
+                        <button id="align-right-btn" title="Alinear derecha">➡️</button>
+                        
+                        <button id="img-btn" title="Insertar Imagen de mis archivos">🖼️ Imagen</button>
+
+<input type="file" id="file-input" style="display:none" accept="image/*">
+
+                        <div class="divider"></div>
+
+                        <div class="format-group">
+                            <button id="bold-btn" title="Negrita"><b>B</b></button>
+                            <button id="italic-btn" title="Cursiva"><i>I</i></button>
+                            <input type="color" id="color-picker" title="Color de texto">
+                        </div>
+
+                        <div class="divider"></div>
+
+                        <button id="clean-spaces-btn" title="Limpiar espacios excesivos">🧹</button>
+
+                        <div class="divider"></div>
+
+                        <button id="undo-btn" title="Deshacer">↩️</button>
+                        <button id="redo-btn" title="Rehacer">↪️</button>
+                        <button id="clear-content-btn" title="Borrar todo">🗑️ Todo</button>
+                    </div>
+                </div>
             </div>
             
             <div id="pages-container"></div>
         </main>
         
         <footer class="document-footer">
-            <p class="signature">® By IDaMAr</p>
+            <p class="signature">By IDaMAr</p>
         </footer>
     </div>
 
-    <button id="print-btn" class="print-fixed-btn">🖨️ Imprimir PDF</button>
+    <button id="print-btn" class="print-fixed-btn">🖨️ Imprimir a PDF</button>
 
     <script src="script.js"></script>
 </body>
