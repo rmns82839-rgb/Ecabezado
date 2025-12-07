@@ -125,3 +125,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadFromStorage();
 });
+// Guardar contenido al escribir
+document.addEventListener('input', () => {
+    const content = document.getElementById('pages-container').innerHTML;
+    const headerData = {
+        taller: document.getElementById('header-taller').value,
+        materia: document.getElementById('header-materia').value
+        // Añade aquí los demás campos del header
+    };
+    localStorage.setItem('documentContent', content);
+    localStorage.setItem('headerData', JSON.stringify(headerData));
+});
+
+// Recuperar contenido al cargar la página
+window.addEventListener('load', () => {
+    const savedContent = localStorage.getItem('documentContent');
+    const savedHeader = JSON.parse(localStorage.getItem('headerData'));
+    
+    if (savedContent) {
+        document.getElementById('pages-container').innerHTML = savedContent;
+    }
+    if (savedHeader) {
+        document.getElementById('header-taller').value = savedHeader.taller || '';
+        document.getElementById('header-materia').value = savedHeader.materia || '';
+    }
+});
