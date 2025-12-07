@@ -7,6 +7,7 @@
     --text-dark: #2c3e50;
     --shadow-deep: 0 8px 25px rgba(0, 0, 0, 0.15);
     --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --glass: rgba(255, 255, 255, 0.7);
 }
 
 body {
@@ -150,67 +151,114 @@ body {
     box-shadow: none;
 }
 
-/* --- BARRA DE HERRAMIENTAS (TOOLBAR) --- */
+/* --- BARRA DE HERRAMIENTAS ACORDEÓN (MEJORADA: SCROLL, DELGADA, TRASLÚCIDA, FLOTANTE) --- */
 #toolbar {
+    position: fixed; /* Flota al hacer scroll */
+    top: 20px;       /* Espacio desde arriba */
+    left: 20px;      /* Espacio desde la izquierda inicial */
+    z-index: 2000;
     display: flex;
-    flex-wrap: wrap; 
-    gap: 8px;
-    margin-bottom: 20px; 
-    padding: 10px;
-    border-radius: 8px;
-    background-color: #ffffff;
-    border: 1px solid #ddd;
-    box-shadow: var(--shadow-light);
+    align-items: center;
+    background-color: var(--glass);
+    backdrop-filter: blur(12px); /* Efecto cristal */
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 40px;
+    box-shadow: var(--shadow-deep);
+    height: 42px;    /* Muy delgada */
+    width: 42px;     /* Cerrada solo muestra el martillo/manija */
+    overflow: hidden;
+    transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s;
+    white-space: nowrap;
+}
+
+/* Se expande horizontalmente al pasar el mouse o foco */
+#toolbar:hover, #toolbar:active {
+    width: auto;
+    max-width: calc(100vw - 40px); /* Evita que se salga de la pantalla */
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.handle {
+    min-width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: move;
+    font-size: 1.2rem;
+    user-select: none;
+}
+
+/* NUEVO: Contenedor para scroll horizontal interno */
+.accordion-scroll-container {
+    flex: 1;
+    overflow-x: auto; /* Permite scroll lateral */
+    display: flex;
+    align-items: center;
+    scrollbar-width: none; /* Oculta scrollbar Firefox */
+}
+.accordion-scroll-container::-webkit-scrollbar {
+    display: none; /* Oculta scrollbar Chrome/Safari */
+}
+
+.accordion-content {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    padding-left: 5px;
+    padding-right: 15px; /* Espacio extra al final */
+}
+
+#toolbar:hover .accordion-content {
+    opacity: 1;
 }
 
 .alignment-group {
     display: flex;
-    gap: 5px;
-    border-left: 2px solid #eee;
-    padding-left: 10px;
+    gap: 4px;
+    border-left: 1px solid rgba(0,0,0,0.1);
+    padding-left: 8px;
 }
 
 #toolbar button {
-    background-color: var(--background-light);
+    background-color: transparent;
     color: var(--text-dark);
-    border: 1px solid #ccc;
-    padding: 8px 12px;
-    border-radius: 4px;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 20px;
     cursor: pointer;
-    font-size: 1.1em;
+    font-size: 0.95em;
     font-weight: 600;
-    line-height: 1; 
+    transition: all 0.2s ease;
+    white-space: nowrap; /* Evita que el texto de botones baje de línea */
 }
 
 #toolbar button:hover {
     background-color: var(--primary-color);
     color: white;
-    border-color: var(--primary-color);
 }
 
 #add-page-btn {
-    background-color: var(--secondary-color);
-    color: white;
-    font-weight: bold;
+    background-color: var(--secondary-color) !important;
+    color: white !important;
 }
 
 #clear-content-btn {
     margin-left: auto; 
     background-color: #f8d7da !important;
-    border-color: #f5c6cb !important;
     color: #721c24 !important;
 }
 
-#clear-content-btn:hover {
-    background-color: #dc3545 !important;
-    color: white !important;
+.divider {
+    width: 1px;
+    height: 15px;
+    background: rgba(0,0,0,0.1);
+    margin: 0 3px;
 }
 
-/* --- CONTENEDOR Y BLOQUES DE PÁGINAS --- */
-#pages-container {
-    padding: 0;
-}
-
+/* --- BLOQUES DE PÁGINAS --- */
 .page-block {
     min-height: 400px; 
     padding: 25px;
@@ -224,8 +272,12 @@ body {
     page-break-inside: avoid; 
 }
 
-.page-block .editable-content {
+/* NUEVA MEJORA: Párrafos equidistantes (justificados) */
+.editable-content {
     min-height: 350px;
+    text-align: justify; 
+    line-height: 1.6;
+    outline: none;
 }
 
 .page-block:focus-within {
@@ -240,10 +292,10 @@ body {
     background-color: #dc3545;
     color: white;
     border: none;
-    padding: 5px 10px;
+    padding: 4px 10px;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 0.8em;
+    font-size: 0.7em;
     z-index: 10;
     opacity: 0.5;
     transition: opacity 0.3s;
@@ -253,15 +305,7 @@ body {
     opacity: 1;
 }
 
-[contenteditable="true"]:empty:before{
-    content: attr(placeholder);
-    color: #a0a0a0;
-    font-style: italic;
-    pointer-events: none;
-    display: block;
-}
-
-/* --- PIE DE PÁGINA (FOOTER) - ESTILO FIRMA AZUL --- */
+/* --- PIE DE PÁGINA --- */
 .document-footer {
     text-align: center;
     margin-top: 40px;
@@ -275,12 +319,10 @@ body {
     font-size: 1.8em; 
     font-weight: 700;
     color: var(--signature-color); 
-    text-transform: none; 
-    letter-spacing: normal;
     margin: 5px 0;
 }
 
-/* --- BOTÓN DE IMPRESIÓN FLOTANTE --- */
+/* --- BOTÓN IMPRESIÓN --- */
 .print-fixed-btn {
     position: fixed;
     bottom: 30px;
@@ -288,63 +330,33 @@ body {
     background-color: var(--primary-color); 
     color: white;
     border: none;
-    padding: 12px 20px; /* MEJORADO: Más balanceado */
+    padding: 12px 20px;
     border-radius: 50px;
-    font-size: 1em; /* MEJORADO: Letra más clara */
+    font-size: 1em;
     font-weight: bold;
     cursor: pointer;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     z-index: 1000;
 }
 
-/* --- RESPONSIVIDAD Y ESTILOS DE IMPRESIÓN --- */
+/* --- RESPONSIVIDAD --- */
 @media (max-width: 600px) {
-    .page-container { margin: 10px auto; padding: 20px 15px; width: 95%; border-radius: 8px; box-shadow: none; }
+    .page-container { margin: 10px auto; padding: 20px 15px; width: 95%; border-radius: 8px; }
     .header-grid { grid-template-columns: 1fr; gap: 10px; }
-    .document-header input[type="text"], .document-header input[type="date"] { width: 100%; }
-    .centered-title-input { font-size: 1.2em; width: 100%; }
-    .print-fixed-btn { bottom: 15px; right: 15px; padding: 10px 15px; font-size: 0.9em; }
-    #toolbar { padding: 8px; gap: 5px; justify-content: center; }
-    #toolbar button { padding: 6px 10px; font-size: 0.9em; }
+    #toolbar { 
+        top: auto; 
+        bottom: 100px; 
+        width: 42px; 
+        left: 50%; 
+        transform: translateX(-50%); 
+    }
+    #toolbar:hover { 
+        width: calc(100vw - 20px); /* Máxima expansión en móvil */
+    }
 }
 
 @media print {
-    body { 
-        background-color: white; 
-        padding: 0 !important;
-        print-color-adjust: exact !important;
-        -webkit-print-color-adjust: exact !important;
-    }
-    .print-fixed-btn, #add-participant-btn, .participant-input .modern-btn, #toolbar, .delete-page-btn { display: none !important; }
-    
-    .page-container { 
-        margin: 0; padding: 0; box-shadow: none; max-width: 100%; border: none; border-top: none !important; 
-    }
-    
-    .page-block {
-        box-shadow: none !important;
-        border: none !important;
-        margin-bottom: 0; 
-        padding: 10px;
-        background-color: transparent !important;
-    }
-    
-    .document-header strong {
-        color: #000 !important;
-    }
-
-    .document-header input { 
-        border: none !important; 
-        width: auto !important; 
-        padding: 0 !important; 
-        content: attr(value); 
-        display: inline-block; 
-        font-weight: normal; 
-    }
-    
-    .centered-title-input { color: black !important; border: none !important; }
-    
-    .document-header { border-bottom: 1px solid #000; }
-    .document-footer { border-top: 1px solid #000; }
-    .document-footer .signature { color: var(--signature-color) !important; }
+    #toolbar, .print-fixed-btn, .delete-page-btn, #add-participant-btn { display: none !important; }
+    .page-container { border-top: none; }
+    .page-block { border: none; box-shadow: none; }
 }
