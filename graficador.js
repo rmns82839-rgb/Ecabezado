@@ -93,15 +93,28 @@ function captureBoard() {
 }
 
 // 5. Graficar Funciones
-function plotFunction() {
-    const fStr = document.getElementById('funInput').value;
+function captureBoard() {
     try {
-        let formula = fStr.replace(/\^/g, "**");
-        board.create('functiongraph', [function(x){ return eval(formula); }], { 
-            strokeWidth: 3, strokeColor: '#673ab7' 
-        });
+        const canvas = document.querySelector('#box canvas');
+        if (canvas) {
+            // Convertimos a imagen
+            const imgData = canvas.toDataURL("image/png");
+            
+            // Creamos un enlace invisible
+            const link = document.createElement('a');
+            link.href = imgData;
+            link.download = 'grafico_idamar_v1.png';
+            
+            // Forzamos el clic para que el navegador lo entienda como descarga manual
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } else {
+            alert("No se detectó el área de dibujo. Intenta con el botón PDF.");
+        }
     } catch (e) {
-        alert("Fórmula no válida.");
+        console.error(e);
+        alert("Bloqueo del navegador detectado. Por favor, toma una captura de pantalla manual o usa el botón PDF.");
     }
 }
 
