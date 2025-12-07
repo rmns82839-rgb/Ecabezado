@@ -168,3 +168,10 @@ window.addEventListener('load', () => {
         if (materia) materia.value = savedHeader.materia || '';
     }
 });
+/**
+ * Abre GeoGebra Clásico en Español en una nueva pestaña.
+ * Esto evita problemas de compatibilidad con bloqueos de canvas en el navegador.
+ */
+function openGeoGebra() {
+    window.open('https://www.geogebra.org/classic?lang=es', '_blank');
+}
