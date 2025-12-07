@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graficador IDaMAr - Plano Cartesiano</title>
+    
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { 
+            --primary: #673ab7; 
+            --secondary: #26a69a; 
+            --accent: #ff9800; 
+            --success: #27ae60; 
+            --danger: #d32f2f;
+        }
+
+        * { box-sizing: border-box; }
+
+        body { 
+            font-family: 'Open Sans', sans-serif; 
+            background: #f0f2f5; 
+            margin: 0; 
+            padding: 10px; 
+        }
+
+        .graficador-container { 
+            max-width: 1200px; 
+            margin: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            border-top: 10px solid var(--primary);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        /* Panel de Controles */
+        .controls-panel { 
+            background: #fafafa; 
+            padding: 20px; 
+            border-radius: 8px; 
+            border: 1px solid #ddd; 
+        }
+
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; font-size: 0.9em; margin-bottom: 5px; color: #555; }
+        
+        .coord-inputs { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+        input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%; font-size: 1em; }
+        .small-input { width: 85px; text-align: center; }
+
+        /* Contenedor del Plano JSXGraph */
+        #box { 
+            width: 100%; 
+            height: 500px; 
+            border-radius: 8px; 
+            border: 1px solid #ddd; 
+            background: #fff; 
+            overflow: hidden; 
+            touch-action: none;
+        }
+
+        /* Botonera */
+        .btn-toolbar { 
+            display: flex; 
+            gap: 8px; 
+            flex-wrap: wrap; 
+            margin-top: 10px; 
+        }
+
+        .modern-btn { 
+            padding: 12px; 
+            border: none; 
+            border-radius: 5px; 
+            color: white; 
+            cursor: pointer; 
+            font-weight: bold; 
+            flex: 1; 
+            min-width: 120px; 
+            transition: 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .btn-point { background: var(--primary); }
+        .btn-line { background: var(--accent); }
+        .btn-fun { background: var(--secondary); }
+        .btn-capture { background: #2196f3; }
+        .btn-print { background: var(--success); }
+        .btn-clear { background: var(--danger); }
+        .btn-back { background: #6c757d; }
+
+        .modern-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* Responsividad PC */
+        @media (min-width: 900px) {
+            .graficador-container { flex-direction: row; }
+            .controls-panel { width: 350px; }
+            #box { flex: 1; height: 600px; }
+        }
+
+        /* Estilos de Impresión */
+        @media print {
+            .controls-panel, .btn-toolbar, .subtitle, h1, .modern-btn { display: none !important; }
+            .graficador-container { border: none; padding: 0; box-shadow: none; }
+            #box { 
+                width: 100% !important; 
+                height: 100vh !important; 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="graficador-container">
+        <div class="controls-panel">
+            <h1 style="color:var(--primary); text-align:center; margin:0; font-size: 1.8em;">Graficador Pro</h1>
+            <p style="text-align:center; color:#777; font-size:0.8em; margin-bottom:20px;">Iván David Montes Arrieta • Suite IDaMAr</p>
+            
+            <div class="input-group">
+                <label>Punto (x, y)</label>
+                <div class="coord-inputs">
+                    <input type="number" id="ptX" class="small-input" placeholder="0">
+                    <input type="number" id="ptY" class="small-input" placeholder="0">
+                </div>
+                <div class="btn-toolbar">
+                    <button class="modern-btn btn-point" onclick="addPoint()">📍 Añadir</button>
+                    <button class="modern-btn btn-line" onclick="toggleLine()">📏 Unir</button>
+                </div>
+            </div>
+
+            <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
+
+            <div class="input-group">
+                <label>Función f(x)</label>
+                <input type="text" id="funInput" placeholder="Ej: x^2 o 2*x + 1">
+                <button class="modern-btn btn-fun" style="width:100%; margin-top:10px;" onclick="plotFunction()">🖋️ Graficar</button>
+            </div>
+
+            <div class="btn-toolbar" style="margin-top:25px;">
+                <button class="modern-btn btn-capture" onclick="captureBoard()">📸 PNG</button>
+                <button class="modern-btn btn-print" onclick="window.print()">🖨️ PDF</button>
+                <button class="modern-btn btn-clear" onclick="resetBoard()">🗑️ Limpiar</button>
+            </div>
+            
+            <button class="modern-btn btn-back" style="width:100%; margin-top:10px;" onclick="window.location.href='index.html'">🏠 Volver al Trabajo</button>
+        </div>
+
+        <div id="box" class="jxgbox"></div>
+    </div>
+
+    <script src="graficador.js"></script>
+</body>
+              </html>
