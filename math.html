@@ -52,7 +52,30 @@
                 <button onclick="insertMath('\\pi')">π</button>
                 <button onclick="insertMath('\\alpha')">α</button>
             </div>
+         <div class="builder-group">
+    <label style="color: #ef6c00; font-weight: bold;">Fórmulas Rápidas:</label>
+    <select id="quick-formula-select" onchange="insertSelectedFormula()" class="modern-select">
+        <option value="" disabled selected>Elige una operación...</option>
+        
+        <optgroup label="Aritmética de Fracciones">
+            <option value="\frac{?}{?} + \frac{?}{?} = \frac{? \cdot ? + ? \cdot ?}{? \cdot ?}">Suma de Fracciones</option>
+            <option value="\frac{?}{?} - \frac{?}{?} = \frac{? \cdot ? - ? \cdot ?}{? \cdot ?}">Resta de Fracciones</option>
+            <option value="\frac{?}{?} \cdot \frac{?}{?} = \frac{? \cdot ?}{? \cdot ?}">Multiplicación de Fracciones</option>
+            <option value="\frac{\frac{?}{?}}{\frac{?}{?}} = \frac{? \cdot ?}{? \cdot ?}">División Compleja (Oreja)</option>
+        </optgroup>
 
+        <optgroup label="Matrices y Determinantes">
+            <option value="\begin{pmatrix} + & - & + \\ - & + & - \\ + & - & + \end{pmatrix}">Matriz de Signos 3x3</option>
+            <option value="\begin{pmatrix} ? & ? & ? & ? \\ ? & ? & ? & ? \\ ? & ? & ? & ? \\ ? & ? & ? & ? \end{pmatrix}">Matriz 4x4 Vacía</option>
+            <option value="\frac{\begin{vmatrix} ? & ? \\ ? & ? \end{vmatrix}}{?}">Regla de Cramer</option>
+        </optgroup>
+
+        <optgroup label="Cálculo / Otros">
+            <option value="\int_{?}^{?} ? \,dx">Integral Definida</option>
+            <option value="\lim_{x \to \infty} ?">Límite al Infinito</option>
+        </optgroup>
+    </select>
+         </div>
             <div class="split-editor">
                 <div class="editor-side">
                     <div class="side-label">CÓDIGO (Rellena los ?)</div>
