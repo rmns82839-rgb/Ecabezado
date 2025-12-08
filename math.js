@@ -1,7 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // ===========================================
-    // DEFINICIONES DE ELEMENTOS
-    // ===========================================
     const mathInput = document.getElementById('math-input');
     const mathPreview = document.getElementById('math-preview');
     const undoBtn = document.getElementById('undo-btn');
@@ -12,18 +9,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let renderTimer;
 
     // ===========================================
-    // RENDERIZADO AUTOMÁTICO (Optimizado para Matrices)
+    // RENDERIZADO AUTOMÁTICO (Original)
     // ===========================================
     const renderMath = () => {
         if (window.MathJax && mathInput && mathPreview) {
-            /** * MEJORA CLAVE: Usamos innerHTML para el preview para mantener 
-             * la estructura de etiquetas si fuera necesario, o textContent 
-             * para evitar que el navegador limpie los saltos de línea \\ 
-             */
-            mathPreview.innerHTML = mathInput.innerHTML;
-            
+            mathPreview.textContent = mathInput.innerText;
             window.MathJax.typesetPromise([mathPreview])
-                .then(() => console.log("Renderizado Exitoso"))
+                .then(() => syncCanvasSize()) // Ajustar canvas después de renderizar
                 .catch((err) => console.log("Error MathJax:", err));
         }
     };
@@ -32,17 +24,16 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(renderTimer);
         renderTimer = setTimeout(() => {
             renderMath();
-            saveToStorage();
-        }, 500); 
+            saveToStorage(); 
+        }, 300); 
     };
 
     // ===========================================
-    // LÓGICA DE MATRICES NXN DINÁMICAS
+    // LÓGICA DE MATRICES NXN DINÁMICAS (Original)
     // ===========================================
     window.insertDynamicMatrix = () => {
         const rows = document.getElementById('matrix-rows').value;
         const cols = document.getElementById('matrix-cols').value;
-        
         let latex = '\\begin{pmatrix} ';
         for (let i = 0; i < rows; i++) {
             for (let j = 0; j < cols; j++) {
@@ -52,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (i < rows - 1) latex += ' \\\\ ';
         }
         latex += ' \\end{pmatrix} ';
-        
         insertMath(latex);
     };
 
@@ -62,128 +52,143 @@ document.addEventListener('DOMContentLoaded', () => {
     window.insertMath = (symbol) => {
         if (mathInput) {
             mathInput.focus();
-            document.execCommand('insertText', false, ' $' + symbol + '$ ');
+            document.execCommand('insertText', false, ` $${symbol}$ `);
             triggerAutoRender();
         }
     };
 
     // ===========================================
-    // ASIGNACIÓN DE EVENTOS
+    // MEJORA: SISTEMA DE DIBUJO (Lápiz, Resaltador, etc.)
+    // ===========================================
+    const canvas = document.getElementById('drawingCanvas');
+    if (!canvas) return; // Seguridad si no existe en el HTML
+    const ctx = canvas.getContext('2d');
+    let drawing = false, tool = 'pen', startX, startY;
+
+    const syncCanvasSize = () => {
+        if (mathPreview && canvas) {
+            canvas.width = mathPreview.offsetWidth;
+            canvas.height = mathPreview.offsetHeight;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+        }
+    };
+
+    const getPos = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+    };
+
+    const startDraw = (e) => {
+        drawing = true;
+        const pos = getPos(e);
+        startX = pos.x; startY = pos.y;
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        if (e.type === 'touchstart') e.preventDefault();
+    };
+
+    const draw = (e) => {
+        if (!drawing) return;
+        const pos = getPos(e);
+        ctx.strokeStyle = document.getElementById('colorPicker')?.value || '#673ab7';
+
+        if (tool === 'pen' || tool === 'highlighter') {
+            ctx.globalAlpha = (tool === 'highlighter') ? 0.3 : 1.0;
+            ctx.lineWidth = (tool === 'highlighter') ? 15 : 2;
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+        }
+        if (e.type === 'touchmove') e.preventDefault();
+    };
+
+    const stopDraw = (e) => {
+        if (!drawing) return;
+        if (tool === 'line' || tool === 'arrow') {
+            const pos = getPos(e.changedTouches ? e.changedTouches[0] : e);
+            ctx.globalAlpha = 1.0;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(pos.x, pos.y);
+            if (tool === 'arrow') {
+                const angle = Math.atan2(pos.y - startY, pos.x - startX);
+                ctx.lineTo(pos.x - 10 * Math.cos(angle - Math.PI/6), pos.y - 10 * Math.sin(angle - Math.PI/6));
+                ctx.moveTo(pos.x, pos.y);
+                ctx.lineTo(pos.x - 10 * Math.cos(angle + Math.PI/6), pos.y - 10 * Math.sin(angle + Math.PI/6));
+            }
+            ctx.stroke();
+        }
+        drawing = false;
+    };
+
+    // Listeners de dibujo (Mouse + Touch)
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousemove', draw);
+    window.addEventListener('mouseup', stopDraw);
+    canvas.addEventListener('touchstart', startDraw, {passive: false});
+    canvas.addEventListener('touchmove', draw, {passive: false});
+    canvas.addEventListener('touchend', stopDraw);
+
+    window.setTool = (t) => { tool = t; };
+    window.clearCanvas = () => ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // ===========================================
+    // ASIGNACIÓN DE EVENTOS (Original)
     // ===========================================
     if(mathInput) {
         mathInput.addEventListener('input', triggerAutoRender);
-    }
-
-    if(undoBtn) {
-        undoBtn.addEventListener('click', () => {
-            document.execCommand('undo');
-            triggerAutoRender();
+        mathInput.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const text = e.clipboardData.getData('text/plain');
+            document.execCommand('insertText', false, text);
         });
     }
-
-    if(redoBtn) {
-        redoBtn.addEventListener('click', () => {
-            document.execCommand('redo');
-            triggerAutoRender();
-        });
-    }
-
-    if(clearBtn) {
-        clearBtn.addEventListener('click', () => {
-            if(confirm("¿Limpiar toda la hoja milimetrada?")) {
-                mathInput.innerHTML = '';
-                mathPreview.innerHTML = '';
-                localStorage.removeItem('mathStorage');
-            }
-        });
-    }
-
-    if(printMathBtn) {
-        printMathBtn.addEventListener('click', () => {
-            renderMath();
-            setTimeout(() => window.print(), 300);
-        });
-    }
+    if(undoBtn) undoBtn.addEventListener('click', () => { mathInput.focus(); document.execCommand('undo'); triggerAutoRender(); });
+    if(redoBtn) redoBtn.addEventListener('click', () => { mathInput.focus(); document.execCommand('redo'); triggerAutoRender(); });
+    if(clearBtn) clearBtn.addEventListener('click', () => { if(confirm("¿Limpiar?")) { mathInput.innerText = ''; localStorage.removeItem('mathStorage'); renderMath(); } });
+    if(printMathBtn) printMathBtn.addEventListener('click', () => { renderMath(); setTimeout(() => window.print(), 500); });
 
     // ===========================================
-    // PERSISTENCIA MEJORADA (Mantiene filas de matriz)
+    // PERSISTENCIA (Original)
     // ===========================================
-    const saveToStorage = () => {
-        if(mathInput) {
-            // Guardamos el HTML completo para no perder los saltos de línea \\
-            localStorage.setItem('mathStorage', mathInput.innerHTML);
-        }
-    }
-
+    const saveToStorage = () => { if(mathInput) localStorage.setItem('mathStorage', mathInput.innerText); }
     const loadFromStorage = () => {
         const saved = localStorage.getItem('mathStorage');
         if (saved && mathInput) {
-            mathInput.innerHTML = saved;
-            // Sincronizamos con el preview usando innerHTML para mantener formato
-            mathPreview.innerHTML = saved;
-            setTimeout(renderMath, 1000);
+            mathInput.innerText = saved;
+            renderMath();
         }
     };
 
     loadFromStorage();
+    syncCanvasSize();
 });
 
-// ===========================================
-// PERSISTENCIA DEL DOCUMENTO Y HEADER
-// ===========================================
+// Mantener persistencia de Pages/Headers (Original)
 document.addEventListener('input', (e) => {
-    // Solo actuamos si existen los contenedores principales
     const pagesContainer = document.getElementById('pages-container');
-    if (pagesContainer) {
-        const content = pagesContainer.innerHTML;
-        localStorage.setItem('documentContent', content);
-    }
-
-    const taller = document.getElementById('header-taller');
-    const materia = document.getElementById('header-materia');
-
-    if (taller && materia) {
-        const headerData = {
-            taller: taller.value,
-            materia: materia.value
-        };
-        localStorage.setItem('headerData', JSON.stringify(headerData));
-    }
+    if (pagesContainer) localStorage.setItem('documentContent', pagesContainer.innerHTML);
+    const taller = document.getElementById('header-taller'), materia = document.getElementById('header-materia');
+    if (taller && materia) localStorage.setItem('headerData', JSON.stringify({ taller: taller.value, materia: materia.value }));
 });
 
 window.addEventListener('load', () => {
-    const savedContent = localStorage.getItem('documentContent');
-    const savedHeader = JSON.parse(localStorage.getItem('headerData'));
-    
-    const pagesContainer = document.getElementById('pages-container');
-    if (savedContent && pagesContainer) {
-        pagesContainer.innerHTML = savedContent;
-    }
-
-    const taller = document.getElementById('header-taller');
-    const materia = document.getElementById('header-materia');
-
+    const savedContent = localStorage.getItem('documentContent'), savedHeader = localStorage.getItem('headerData');
+    if (savedContent && document.getElementById('pages-container')) document.getElementById('pages-container').innerHTML = savedContent;
     if (savedHeader) {
-        if (taller) taller.value = savedHeader.taller || '';
-        if (materia) materia.value = savedHeader.materia || '';
+        const data = JSON.parse(savedHeader);
+        if (document.getElementById('header-taller')) document.getElementById('header-taller').value = data.taller || '';
+        if (document.getElementById('header-materia')) document.getElementById('header-materia').value = data.materia || '';
     }
 });
-/**
- * Abre GeoGebra Clásico en Español en una nueva pestaña.
- * Esto evita problemas de compatibilidad con bloqueos de canvas en el navegador.
- */
-function openGeoGebra() {
-    window.open('https://www.geogebra.org/classic?lang=es', '_blank');
-}
+
 window.insertSelectedFormula = () => {
     const select = document.getElementById('quick-formula-select');
-    const formula = select.value;
-    
-    if (formula !== "") {
-        // Utilizamos la función insertMath que ya tienes creada
-        insertMath(formula);
-        
-        // Regresamos el selector a la posición inicial
+    if (select && select.value !== "") {
+        insertMath(select.value);
         select.selectedIndex = 0;
     }
 };
