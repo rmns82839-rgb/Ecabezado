@@ -2,12 +2,21 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Laboratorio Matemático Pro - IDaMAr</title>
+    <link rel="icon" href="favicon.ico">
     <link rel="stylesheet" href="math.css">
+    
     <script>
         window.MathJax = {
-            tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']] },
+            tex: { 
+                inlineMath: [['$', '$']], 
+                displayMath: [['$$', '$$']],
+                processEscapes: true
+            },
+            options: {
+                enableMenu: false 
+            },
             svg: { fontCache: 'global' }
         };
     </script>
@@ -18,96 +27,107 @@
 
     <div class="page-container math-mode">
         <header class="document-header">
-            <img src="logo.jpg" alt="Logo IDaMAr" class="app-logo">
-            <div class="title-container">
-                <h1 class="math-title">EDITOR MATEMÁTICO PRO</h1>
-                <p class="subtitle"> Ecuanciones Matemáticas</p>
+            <div class="header-content">
+                <img src="logo.jpg" alt="Logo IDaMAr" class="app-logo">
+                <div class="title-container">
+                    <h1 class="math-title">EDITOR MATEMÁTICO PRO</h1>
+                    <p class="subtitle">Iván David Montes Arrieta • Constructor de Matrices nxn</p>
+                </div>
             </div>
         </header>
 
-        <main>
-            <div class="matrix-builder">
-                <div class="builder-group">
-                    <label>Filas:</label>
-                    <select id="matrix-rows">
-                        <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option>
-                        <option value="4">4</option><option value="5">5</option>
-                    </select>
+        <main class="main-content">
+            <section class="matrix-builder-section card" aria-labelledby="matrix-title">
+                <div class="matrix-builder">
+                    <div class="builder-group">
+                        <label for="matrix-rows">Filas:</label>
+                        <select id="matrix-rows" class="modern-select">
+                            <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option>
+                            <option value="4">4</option><option value="5">5</option>
+                        </select>
+                    </div>
+                    <div class="builder-group">
+                        <label for="matrix-cols">Columnas:</label>
+                        <select id="matrix-cols" class="modern-select">
+                            <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option>
+                            <option value="4">4</option><option value="5">5</option>
+                        </select>
+                    </div>
+                    <button type="button" onclick="insertDynamicMatrix()" class="modern-btn insert-matrix-btn" title="Insertar matriz personalizada">➕ Insertar Matriz</button>
                 </div>
-                <div class="builder-group">
-                    <label>Columnas:</label>
-                    <select id="matrix-cols">
-                        <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option>
-                        <option value="4">4</option><option value="5">5</option>
-                    </select>
+            </section>
+
+            <section class="tools-section card">
+                <div class="math-keyboard">
+                    <button type="button" onclick="insertMath('\\frac{?}{?}')" class="symbol-btn">➗ Fracción</button>
+                    <button type="button" onclick="insertMath('\\sqrt{?}')" class="symbol-btn">√ Raíz</button>
+                    <button type="button" onclick="insertMath('\\int_{?}^{?}')" class="symbol-btn">∫ Integral</button>
+                    <button type="button" onclick="insertMath('?^{?}')" class="symbol-btn">x² Potencia</button>
+                    <button type="button" onclick="insertMath('\\pi')" class="symbol-btn">π</button>
+                    <button type="button" onclick="insertMath('\\alpha')" class="symbol-btn">α</button>
+
+                    <div class="quick-formulas builder-group">
+                        <label for="quick-formula-select" style="color: #ef6c00; font-weight: bold;">Fórmulas Rápidas:</label>
+                        <select id="quick-formula-select" onchange="insertSelectedFormula()" class="modern-select highlight-select">
+                            <option value="" disabled selected>Elige una operación...</option>
+                            <optgroup label="Aritmética de Fracciones">
+                                <option value="\frac{?}{?} + \frac{?}{?} = \frac{? \cdot ? + ? \cdot ?}{? \cdot ?}">Suma de Fracciones</option>
+                                <option value="\frac{?}{?} - \frac{?}{?} = \frac{? \cdot ? - ? \cdot ?}{? \cdot ?}">Resta de Fracciones</option>
+                                <option value="\frac{?}{?} \cdot \frac{?}{?} = \frac{? \cdot ?}{? \cdot ?}">Multiplicación de Fracciones</option>
+                                <option value="\frac{\frac{?}{?}}{\frac{?}{?}} = \frac{? \cdot ?}{? \cdot ?}">División Compleja (Oreja)</option>
+                            </optgroup>
+                            <optgroup label="Matrices y Determinantes">
+                                <option value="\begin{pmatrix} + & - & + \\ - & + & - \\ + & - & + \end{pmatrix}">Matriz de Signos 3x3</option>
+                                <option value="\begin{pmatrix} ? & ? & ? & ? \\ ? & ? & ? & ? \\ ? & ? & ? & ? \\ ? & ? & ? & ? \end{pmatrix}">Matriz 4x4 Vacía</option>
+                                <option value="\frac{\begin{vmatrix} ? & ? \\ ? & ? \end{vmatrix}}{?}">Regla de Cramer</option>
+                            </optgroup>
+                            <optgroup label="Cálculo / Otros">
+                                <option value="\int_{?}^{?} ? \,dx">Integral Definida</option>
+                                <option value="\lim_{x \to \infty} ?">Límite al Infinito</option>
+                            </optgroup>
+                        </select>
+                    </div>              
                 </div>
-                <button onclick="insertDynamicMatrix()" class="modern-btn insert-matrix-btn">➕ Insertar Matriz</button>
-            </div>
+            </section>
 
-            <div class="math-keyboard">
-                <button onclick="insertMath('\\frac{?}{?}')">➗ Fracción</button>
-                <button onclick="insertMath('\\sqrt{?}')">√ Raíz</button>
-                <button onclick="insertMath('\\int_{?}^{?}')">∫ Integral</button>
-                <button onclick="insertMath('?^{?}')">x² Potencia</button>
-                <button onclick="insertMath('\\pi')">π</button>
-                <button onclick="insertMath('\\alpha')">α</button>
-            </div>
-         <div class="builder-group">
-    <label style="color: #ef6c00; font-weight: bold;">Fórmulas Rápidas:</label>
-    <select id="quick-formula-select" onchange="insertSelectedFormula()" class="modern-select">
-        <option value="" disabled selected>Elige una operación...</option>
-        
-        <optgroup label="Aritmética de Fracciones">
-            <option value="\frac{?}{?} + \frac{?}{?} = \frac{? \cdot ? + ? \cdot ?}{? \cdot ?}">Suma de Fracciones</option>
-            <option value="\frac{?}{?} - \frac{?}{?} = \frac{? \cdot ? - ? \cdot ?}{? \cdot ?}">Resta de Fracciones</option>
-            <option value="\frac{?}{?} \cdot \frac{?}{?} = \frac{? \cdot ?}{? \cdot ?}">Multiplicación de Fracciones</option>
-            <option value="\frac{\frac{?}{?}}{\frac{?}{?}} = \frac{? \cdot ?}{? \cdot ?}">División Compleja (Oreja)</option>
-        </optgroup>
-
-        <optgroup label="Matrices y Determinantes">
-            <option value="\begin{pmatrix} + & - & + \\ - & + & - \\ + & - & + \end{pmatrix}">Matriz de Signos 3x3</option>
-            <option value="\begin{pmatrix} ? & ? & ? & ? \\ ? & ? & ? & ? \\ ? & ? & ? & ? \\ ? & ? & ? & ? \end{pmatrix}">Matriz 4x4 Vacía</option>
-            <option value="\frac{\begin{vmatrix} ? & ? \\ ? & ? \end{vmatrix}}{?}">Regla de Cramer</option>
-        </optgroup>
-
-        <optgroup label="Cálculo / Otros">
-            <option value="\int_{?}^{?} ? \,dx">Integral Definida</option>
-            <option value="\lim_{x \to \infty} ?">Límite al Infinito</option>
-        </optgroup>
-    </select>
-         </div>
-            <div class="split-editor">
-                <div class="editor-side">
-                    <div class="side-label">CÓDIGO (Rellena los ?)</div>
-                    <div id="math-input" contenteditable="true" placeholder="Escribe aquí..."></div>
+            <section class="editor-section">
+                <div class="drawing-toolbar">
+                    <button type="button" onclick="setTool('pen')" class="tool-btn" title="Lápiz">✏️</button>
+                    <button type="button" onclick="setTool('highlighter')" class="tool-btn" title="Resaltador">🖍️</button>
+                    <button type="button" onclick="setTool('line')" class="tool-btn" title="Línea">📏</button>
+                    <button type="button" onclick="setTool('arrow')" class="tool-btn" title="Flecha">↗️</button>
+                    <input type="color" id="colorPicker" value="#673ab7" title="Color de dibujo">
+                    <button type="button" onclick="clearCanvas()" class="tool-btn clear-draw" title="Borrar Dibujo">🗑️</button>
                 </div>
- <div class="drawing-toolbar">
-    <button onclick="setTool('pen')" class="tool-btn">✏️ Lápiz</button>
-    <button onclick="setTool('highlighter')" class="tool-btn">🖍️ Resaltador</button>
-    <button onclick="setTool('line')" class="tool-btn">📏 Línea</button>
-    <button onclick="setTool('arrow')" class="tool-btn">↗️ Flecha</button>
-    <input type="color" id="colorPicker" value="#673ab7">
-    <button onclick="clearCanvas()" class="tool-btn clear-draw">🗑️ Borrar Dibujo</button>
- </div>
-                <div class="preview-side">
-                    <div class="side-label">VISTA PREVIA (Hoja Milimetrada)</div>
-                    <div id="math-preview" class="grid-paper"></div>
-                </div>
-            </div>
 
-            <div class="button-toolbar">
-                <button id="undo-btn" class="modern-btn edit-btn">↩️ Deshacer</button>
-                <button id="redo-btn" class="modern-btn edit-btn">↪️ Rehacer</button>
-                <button id="clear-btn" class="modern-btn clear-btn">🗑️ Limpiar</button>
-                <button onclick="window.location.href='graficador.html'" class="modern-btn" style="background: #26a69a;">📈 Graficador</button>
-                <button onclick="openGeoGebra()" class="modern-btn" style="background: #6666ff; color: white;">📈 GeoGebra Pro</button>
-                <button id="print-math-btn" class="modern-btn print-btn">🖨️ Imprimir PDF</button>
-                <button class="modern-btn back-btn" onclick="window.location.href='index.html'">🏠 Volver</button>
-            </div>
+                <div class="split-editor">
+                    <div class="editor-side card">
+                        <div class="side-label">CÓDIGO (Rellena los ?)</div>
+                        <div id="math-input" contenteditable="true" aria-label="Editor de código matemático" placeholder="Escribe aquí..."></div>
+                    </div>
+
+                    <div class="preview-side card">
+                        <div class="side-label">VISTA PREVIA (Hoja Milimetrada)</div>
+                        <div class="preview-container">
+                            <canvas id="drawing-canvas"></canvas>
+                            <div id="math-preview" class="grid-paper"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="button-toolbar">
+                <button type="button" id="undo-btn" class="modern-btn edit-btn">↩️ Deshacer</button>
+                <button type="button" id="redo-btn" class="modern-btn edit-btn">↪️ Rehacer</button>
+                <button type="button" id="export-img-btn" class="modern-btn save-btn">🖼️ Guardar Imagen</button>
+                <button type="button" id="clear-btn" class="modern-btn clear-btn">🗑️ Limpiar Todo</button>
+                <button type="button" id="print-math-btn" class="modern-btn print-btn">🖨️ PDF</button>
+                <button type="button" class="modern-btn back-btn" onclick="window.location.href='index.html'">🏠 Volver</button>
+            </footer>
         </main>
 
         <footer class="document-footer">
-            <p class="signature">® By IDaMAr</p>
+            <p class="signature">© By IDaMAr - Iván David Montes Arrieta</p>
         </footer>
     </div>
 
