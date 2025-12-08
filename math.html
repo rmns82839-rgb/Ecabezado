@@ -15,7 +15,10 @@
                 processEscapes: true
             },
             options: {
-                enableMenu: false 
+                enableMenu: false,
+                /* MEJORA: Definimos qué clases procesar y cuáles ignorar */
+                ignoreHtmlClass: 'tex2jax_ignore',
+                processHtmlClass: 'tex2jax_process'
             },
             svg: { fontCache: 'global' }
         };
@@ -37,7 +40,7 @@
         </header>
 
         <main class="main-content">
-            <section class="matrix-builder-section card" aria-labelledby="matrix-title">
+            <section class="matrix-builder-section card">
                 <div class="matrix-builder">
                     <div class="builder-group">
                         <label for="matrix-rows">Filas:</label>
@@ -97,21 +100,20 @@
                     <button type="button" onclick="setTool('line')" class="tool-btn" title="Línea">📏</button>
                     <button type="button" onclick="setTool('arrow')" class="tool-btn" title="Flecha">↗️</button>
                     <input type="color" id="colorPicker" value="#673ab7" title="Color de dibujo">
-                    <button type="button" onclick="setTool(null)" class="tool-btn" title="Cursor normal">🖐️</button>
                     <button type="button" onclick="clearCanvas()" class="tool-btn clear-draw" title="Borrar Dibujo">🗑️</button>
                 </div>
 
                 <div class="split-editor">
                     <div class="editor-side card">
                         <div class="side-label">CÓDIGO (Rellena los ?)</div>
-                        <div id="math-input" contenteditable="true" aria-label="Editor de código matemático" placeholder="Escribe aquí..."></div>
+                        <div id="math-input" class="tex2jax_ignore" contenteditable="true" aria-label="Editor de código matemático" placeholder="Escribe aquí..."></div>
                     </div>
 
                     <div class="preview-side card">
                         <div class="side-label">VISTA PREVIA (Hoja Milimetrada)</div>
                         <div class="preview-container">
                             <canvas id="drawing-canvas"></canvas>
-                            <div id="math-preview" class="grid-paper"></div>
+                            <div id="math-preview" class="grid-paper tex2jax_process"></div>
                         </div>
                     </div>
                 </div>
@@ -120,9 +122,8 @@
             <footer class="button-toolbar">
                 <button type="button" id="undo-btn" class="modern-btn edit-btn">↩️ Deshacer</button>
                 <button type="button" id="redo-btn" class="modern-btn edit-btn">↪️ Rehacer</button>
-                <button type="button" id="export-img-btn" class="modern-btn save-btn">🖼️ Guardar Imagen</button>
                 <button type="button" id="clear-btn" class="modern-btn clear-btn">🗑️ Limpiar Todo</button>
-                <button type="button" id="print-math-btn" class="modern-btn print-btn">🖨️ PDF</button>
+                <button type="button" id="print-math-btn" class="modern-btn print-btn">🖨️ Imprimir PDF</button>
                 <button type="button" class="modern-btn back-btn" onclick="window.location.href='index.html'">🏠 Volver</button>
             </footer>
         </main>
