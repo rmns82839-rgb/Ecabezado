@@ -259,3 +259,47 @@ document.addEventListener('DOMContentLoaded', () => {
     loadFromStorage();
     if(mathInput) mathInput.addEventListener('input', triggerAutoRender);
 });
+// ===========================================
+// NUEVAS FUNCIONES DE ESTILO DE RESULTADO
+// ===========================================
+
+// Enmarcar el resultado (Crea un cuadro alrededor)
+window.boxResult = () => {
+    const userValue = prompt("Escribe el resultado a enmarcar:", "x = 5");
+    if (userValue) window.insertMath(`\\boxed{ ${userValue.trim()} } `);
+};
+
+// Poner en negrita matemática
+window.boldResult = () => {
+    const userValue = prompt("Escribe el texto para poner en negrita:", "Solución");
+    if (userValue) window.insertMath(`\\mathbf{ ${userValue.trim()} } `);
+};
+
+// Cambiar color al resultado (Azul por defecto, puedes cambiarlo)
+window.colorResult = () => {
+    const userValue = prompt("Escribe el resultado para colorear:", "x = 10");
+    if (userValue) window.insertMath(`\\color{blue}{ ${userValue.trim()} } `);
+};
+
+// ===========================================
+// ACTUALIZACIÓN DEL RENDER (Manteniendo el aligned)
+// ===========================================
+const renderMath = () => {
+    if (window.MathJax && mathInput && mathPreview) {
+        let rawContent = mathInput.innerText.replace(/\u00a0/g, ' ').trim();
+        if (rawContent === "") {
+            mathPreview.textContent = "";
+        } else {
+            // El entorno aligned permite que los marcos y colores se vean bien
+            mathPreview.textContent = `$$ \\begin{aligned} ${rawContent} \\end{aligned} $$`;
+        }
+        if (typeof window.MathJax.typesetPromise === 'function') {
+            window.MathJax.typesetPromise([mathPreview])
+                .then(() => syncCanvasSize())
+                .catch((err) => console.log("Error MathJax:", err));
+        } else {
+            window.MathJax.typeset([mathPreview]);
+            syncCanvasSize();
+        }
+    }
+};
