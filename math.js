@@ -6,31 +6,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearBtn = document.getElementById('clear-btn');
     const printMathBtn = document.getElementById('print-math-btn');
     const exportImgBtn = document.getElementById('export-img-btn');
-
     let renderTimer;
 
     // ===========================================
-    // NUEVA FUNCIÓN: PROCESAR SELECT DESPLEGABLE
+    // MEJORA: INSERTAR DESDE DESPLEGABLE
     // ===========================================
     window.insertSelectedFormula = () => {
         const select = document.getElementById('quick-formula-select');
         if (select && select.value) {
-            // Inserta la fórmula seleccionada usando la lógica de teclado
-            insertMath(select.value);
-            // Resetea el select a la opción inicial
+            // Inserta en el editor
+            window.insertMath(select.value);
+            // Regresa el select a la opción inicial
             select.selectedIndex = 0;
         }
     };
 
     // ===========================================
-    // RENDERIZADO AUTOMÁTICO (Mejorado)
+    // RENDERIZADO EXCLUSIVO (Papel Milimetrado)
     // ===========================================
     const renderMath = () => {
         if (window.MathJax && mathInput && mathPreview) {
+            // Sincroniza el texto plano del editor a la vista previa
             mathPreview.textContent = mathInput.innerText;
-            window.MathJax.typesetPromise([mathPreview])
-                .then(() => syncCanvasSize())
-                .catch((err) => console.log("Error MathJax:", err));
+            
+            // Le pide a MathJax que procese SOLO la vista previa
+            if (typeof window.MathJax.typesetPromise === 'function') {
+                window.MathJax.typesetPromise([mathPreview])
+                    .then(() => syncCanvasSize())
+                    .catch((err) => console.log("Error MathJax:", err));
+            } else {
+                window.MathJax.typeset([mathPreview]);
+                syncCanvasSize();
+            }
         }
     };
 
@@ -43,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===========================================
-    // LÓGICA DE MATRICES NXN DINÁMICAS
+    // LÓGICA DE MATRICES NXN (Mantenida)
     // ===========================================
     window.insertDynamicMatrix = () => {
         const rows = document.getElementById('matrix-rows').value;
@@ -57,22 +64,23 @@ document.addEventListener('DOMContentLoaded', () => {
             if (i < rows - 1) latex += ' \\\\ ';
         }
         latex += ' \\end{pmatrix} ';
-        insertMath(latex);
+        window.insertMath(latex);
     };
 
     // ===========================================
-    // BOTONES TECLADO
+    // BOTONES TECLADO (Mejorado para solo texto plano)
     // ===========================================
     window.insertMath = (symbol) => {
         if (mathInput) {
             mathInput.focus();
+            // Se inserta como texto plano para no renderizar en el editor
             document.execCommand('insertText', false, ` $${symbol}$ `);
             triggerAutoRender();
         }
     };
 
     // ===========================================
-    // SISTEMA DE DIBUJO
+    // SISTEMA DE DIBUJO (Mantenido)
     // ===========================================
     const canvas = document.getElementById('drawing-canvas'); 
     if (!canvas) return;
@@ -84,7 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.setTool = (t) => { 
         const buttons = document.querySelectorAll('.tool-btn');
         if (tool === t) { tool = null; } else { tool = t; }
-
         buttons.forEach(btn => {
             btn.classList.remove('active-tool');
             if (tool && btn.getAttribute('onclick').includes(`'${tool}'`)) {
@@ -98,7 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const tempImg = canvas.toDataURL();
             canvas.width = mathPreview.scrollWidth;
             canvas.height = mathPreview.scrollHeight;
-            
             const img = new Image();
             img.onload = () => {
                 ctx.drawImage(img, 0, 0);
@@ -130,7 +136,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!drawing || !tool) return;
         const pos = getPos(e);
         ctx.strokeStyle = document.getElementById('colorPicker')?.value || '#673ab7';
-
         if (tool === 'pen' || tool === 'highlighter') {
             ctx.globalAlpha = (tool === 'highlighter') ? 0.3 : 1.0;
             ctx.lineWidth = (tool === 'highlighter') ? 15 : 2;
@@ -140,23 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.type === 'touchmove') e.preventDefault();
     };
 
-    const stopDraw = (e) => {
-        if (!drawing) return;
-        if (tool === 'line' || tool === 'arrow') {
-            const pos = getPos(e.changedTouches ? e.changedTouches[0] : e);
-            ctx.globalAlpha = 1.0;
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(startX, startY);
-            ctx.lineTo(pos.x, pos.y);
-            if (tool === 'arrow') {
-                const angle = Math.atan2(pos.y - startY, pos.x - startX);
-                ctx.lineTo(pos.x - 10 * Math.cos(angle - Math.PI/6), pos.y - 10 * Math.sin(angle - Math.PI/6));
-                ctx.moveTo(pos.x, pos.y);
-                ctx.lineTo(pos.x - 10 * Math.cos(angle + Math.PI/6), pos.y - 10 * Math.sin(angle + Math.PI/6));
-            }
-            ctx.stroke();
-        }
+    const stopDraw = () => {
         drawing = false;
         saveCanvasToStorage(); 
     };
@@ -174,51 +163,43 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===========================================
-    // GUARDAR FOTO CON FONDO BLANCO
-    // ===========================================
-    if (exportImgBtn) {
-        exportImgBtn.addEventListener('click', () => {
-            const tempCanvas = document.createElement('canvas');
-            const tempCtx = tempCanvas.getContext('2d');
-            tempCanvas.width = canvas.width;
-            tempCanvas.height = canvas.height;
-
-            tempCtx.fillStyle = "white";
-            tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-            tempCtx.drawImage(canvas, 0, 0);
-
-            const link = document.createElement('a');
-            link.download = `Matriz_IDaMAr_${Date.now()}.png`;
-            link.href = tempCanvas.toDataURL("image/png");
-            link.click();
-        });
-    }
-
-    // ===========================================
-    // ASIGNACIÓN DE EVENTOS
-    // ===========================================
-    if(mathInput) {
-        mathInput.addEventListener('input', triggerAutoRender);
-    }
-    if(undoBtn) undoBtn.addEventListener('click', () => { mathInput.focus(); document.execCommand('undo'); triggerAutoRender(); });
-    if(redoBtn) redoBtn.addEventListener('click', () => { mathInput.focus(); document.execCommand('redo'); triggerAutoRender(); });
-    if(clearBtn) clearBtn.addEventListener('click', () => { 
-        if(confirm("¿Limpiar todo?")) { mathInput.innerText = ''; window.clearCanvas(); localStorage.removeItem('mathStorage'); renderMath(); } 
-    });
-    if(printMathBtn) printMathBtn.addEventListener('click', () => { renderMath(); setTimeout(() => window.print(), 500); });
-
-    // ===========================================
     // PERSISTENCIA
     // ===========================================
     const saveToStorage = () => { if(mathInput) localStorage.setItem('mathStorage', mathInput.innerText); };
     const saveCanvasToStorage = () => { localStorage.setItem('canvasStorage', canvas.toDataURL()); };
+
     const loadFromStorage = () => {
         const savedText = localStorage.getItem('mathStorage');
-        if (savedText && mathInput) { mathInput.innerText = savedText; renderMath(); }
+        if (savedText && mathInput) { 
+            mathInput.innerText = savedText; 
+            setTimeout(renderMath, 800); 
+        }
         const savedImg = localStorage.getItem('canvasStorage');
-        if (savedImg) { const img = new Image(); img.onload = () => ctx.drawImage(img, 0, 0); img.src = savedImg; }
+        if (savedImg) { 
+            const img = new Image(); 
+            img.onload = () => ctx.drawImage(img, 0, 0); 
+            img.src = savedImg; 
+        }
     };
 
+    // ===========================================
+    // EVENTOS DE BOTONES
+    // ===========================================
+    if(undoBtn) undoBtn.addEventListener('click', () => { mathInput.focus(); document.execCommand('undo'); triggerAutoRender(); });
+    if(redoBtn) redoBtn.addEventListener('click', () => { mathInput.focus(); document.execCommand('redo'); triggerAutoRender(); });
+    if(clearBtn) clearBtn.addEventListener('click', () => { 
+        if(confirm("¿Limpiar todo?")) { 
+            mathInput.innerText = ''; 
+            window.clearCanvas(); 
+            localStorage.removeItem('mathStorage'); 
+            renderMath(); 
+        } 
+    });
+    if(printMathBtn) printMathBtn.addEventListener('click', () => { 
+        renderMath(); 
+        setTimeout(() => window.print(), 500); 
+    });
+
     loadFromStorage();
-    setTimeout(syncCanvasSize, 500);
+    if(mathInput) mathInput.addEventListener('input', triggerAutoRender);
 });
