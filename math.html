@@ -16,7 +16,6 @@
             },
             options: {
                 enableMenu: false,
-                /* MEJORA: Definimos qué clases procesar y cuáles ignorar */
                 ignoreHtmlClass: 'tex2jax_ignore',
                 processHtmlClass: 'tex2jax_process'
             },
@@ -27,7 +26,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
     <div class="page-container math-mode">
         <header class="document-header">
             <div class="header-content">
@@ -56,22 +54,24 @@
                             <option value="4">4</option><option value="5">5</option>
                         </select>
                     </div>
-                    <button type="button" onclick="insertDynamicMatrix()" class="modern-btn insert-matrix-btn" title="Insertar matriz personalizada">➕ Insertar Matriz</button>
+                    <button type="button" onclick="window.insertDynamicMatrix()" class="modern-btn insert-matrix-btn" title="Insertar matriz personalizada">➕ Insertar Matriz</button>
                 </div>
             </section>
 
             <section class="tools-section card">
                 <div class="math-keyboard">
-                    <button type="button" onclick="insertMath('\\frac{?}{?}')" class="symbol-btn">➗ Fracción</button>
-                    <button type="button" onclick="insertMath('\\sqrt{?}')" class="symbol-btn">√ Raíz</button>
-                    <button type="button" onclick="insertMath('\\int_{?}^{?}')" class="symbol-btn">∫ Integral</button>
-                    <button type="button" onclick="insertMath('?^{?}')" class="symbol-btn">x² Potencia</button>
-                    <button type="button" onclick="insertMath('\\pi')" class="symbol-btn">π</button>
-                    <button type="button" onclick="insertMath('\\alpha')" class="symbol-btn">α</button>
+                    <button type="button" onclick="window.insertMath('\\frac{?}{?}')" class="symbol-btn">➗ Fracción</button>
+                    <button type="button" onclick="window.insertMath('\\sqrt{?}')" class="symbol-btn">√ Raíz</button>
+                    <button type="button" onclick="window.insertMath('\\int_{?}^{?}')" class="symbol-btn">∫ Integral</button>
+                    <button type="button" onclick="window.insertMath('?^{?}')" class="symbol-btn">x² Potencia</button>
+                    <button type="button" onclick="window.insertMath('\\pi')" class="symbol-btn">π</button>
+                    <button type="button" onclick="window.insertMath('\\alpha')" class="symbol-btn">α</button>
+                    
+                    <button type="button" onclick="window.insertMath('\\\\ ')" class="symbol-btn" style="background-color: #e3f2fd; border-color: #2196f3; color: #0d47a1; font-weight: bold;">⏎ Salto Línea</button>
 
                     <div class="quick-formulas builder-group">
                         <label for="quick-formula-select" style="color: #ef6c00; font-weight: bold;">Fórmulas Rápidas:</label>
-                        <select id="quick-formula-select" onchange="insertSelectedFormula()" class="modern-select highlight-select">
+                        <select id="quick-formula-select" onchange="window.insertSelectedFormula()" class="modern-select highlight-select">
                             <option value="" disabled selected>Elige una operación...</option>
                             <optgroup label="Aritmética de Fracciones">
                                 <option value="\frac{?}{?} + \frac{?}{?} = \frac{? \cdot ? + ? \cdot ?}{? \cdot ?}">Suma de Fracciones</option>
@@ -81,31 +81,31 @@
                             </optgroup>
                             <optgroup label="Matrices y Determinantes">
                                 <option value="\begin{pmatrix} + & - & + \\ - & + & - \\ + & - & + \end{pmatrix}">Matriz de Signos 3x3</option>
-                                <option value="\begin{pmatrix} ? & ? & ? & ? \\ ? & ? & ? & ? \\ ? & ? & ? & ? \\ ? & ? & ? & ? \end{pmatrix}">Matriz 4x4 Vacía</option>
+                                <option value="\begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix}">Matriz Identidad</option>
                                 <option value="\frac{\begin{vmatrix} ? & ? \\ ? & ? \end{vmatrix}}{?}">Regla de Cramer</option>
                             </optgroup>
-                            <optgroup label="Cálculo / Otros">
-                                <option value="\int_{?}^{?} ? \,dx">Integral Definida</option>
-                                <option value="\lim_{x \to \infty} ?">Límite al Infinito</option>
-                            </optgroup>
                         </select>
-                    </div>              
+                    </div>               
                 </div>
             </section>
 
             <section class="editor-section">
                 <div class="drawing-toolbar">
-                    <button type="button" onclick="setTool('pen')" class="tool-btn" title="Lápiz">✏️</button>
-                    <button type="button" onclick="setTool('highlighter')" class="tool-btn" title="Resaltador">🖍️</button>
-                    <button type="button" onclick="setTool('line')" class="tool-btn" title="Línea">📏</button>
-                    <button type="button" onclick="setTool('arrow')" class="tool-btn" title="Flecha">↗️</button>
+                    <button type="button" onclick="window.setTool('pen')" class="tool-btn" title="Lápiz">✏️</button>
+                    <button type="button" onclick="window.setTool('highlighter')" class="tool-btn" title="Resaltador">🖍️</button>
+                    <button type="button" onclick="window.setTool('line')" class="tool-btn" title="Línea">📏</button>
+                    <button type="button" onclick="window.setTool('arrow')" class="tool-btn" title="Flecha">↗️</button>
                     <input type="color" id="colorPicker" value="#673ab7" title="Color de dibujo">
-                    <button type="button" onclick="clearCanvas()" class="tool-btn clear-draw" title="Borrar Dibujo">🗑️</button>
+                    
+                    <button type="button" onclick="window.undoDraw()" class="tool-btn" title="Deshacer trazo">↩️</button>
+                    <button type="button" onclick="window.redoDraw()" class="tool-btn" title="Rehacer trazo">↪️</button>
+                    
+                    <button type="button" onclick="window.clearCanvas()" class="tool-btn clear-draw" title="Borrar Dibujo">🗑️</button>
                 </div>
 
                 <div class="split-editor">
                     <div class="editor-side card">
-                        <div class="side-label">CÓDIGO (Rellena los ?)</div>
+                        <div class="side-label">CÓDIGO (LaTeX)</div>
                         <div id="math-input" class="tex2jax_ignore" contenteditable="true" aria-label="Editor de código matemático" placeholder="Escribe aquí..."></div>
                     </div>
 
@@ -120,8 +120,8 @@
             </section>
 
             <footer class="button-toolbar">
-                <button type="button" id="undo-btn" class="modern-btn edit-btn">↩️ Deshacer</button>
-                <button type="button" id="redo-btn" class="modern-btn edit-btn">↪️ Rehacer</button>
+                <button type="button" id="undo-btn" onclick="window.undoDraw()" class="modern-btn edit-btn">↩️ Deshacer Dibujo</button>
+                <button type="button" id="redo-btn" onclick="window.redoDraw()" class="modern-btn edit-btn">↪️ Rehacer Dibujo</button>
                 <button type="button" id="clear-btn" class="modern-btn clear-btn">🗑️ Limpiar Todo</button>
                 <button type="button" id="print-math-btn" class="modern-btn print-btn">🖨️ Imprimir PDF</button>
                 <button type="button" class="modern-btn back-btn" onclick="window.location.href='index.html'">🏠 Volver</button>
@@ -132,7 +132,6 @@
             <p class="signature">© By IDaMAr - Iván David Montes Arrieta</p>
         </footer>
     </div>
-
     <script src="math.js"></script>
 </body>
 </html>
