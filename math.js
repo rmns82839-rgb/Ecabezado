@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===========================================
     const renderMath = () => {
         if (window.MathJax && mathInput && mathPreview) {
-            // Sincroniza el contenido cuidando los saltos de línea
             mathPreview.textContent = mathInput.innerText;
             window.MathJax.typesetPromise([mathPreview])
                 .then(() => syncCanvasSize())
@@ -59,27 +58,50 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===========================================
-    // MEJORA: SISTEMA DE DIBUJO (Touch + Mouse + Storage)
+    // SISTEMA DE DIBUJO (Touch + Mouse + Storage)
     // ===========================================
-    const canvas = document.getElementById('drawing-canvas'); // Corregido ID
+    const canvas = document.getElementById('drawing-canvas'); 
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    let drawing = false, tool = 'pen', startX, startY;
+    let drawing = false;
+    let tool = null; // MEJORA: Se inicializa en null para evitar dibujo accidental
+    let startX, startY;
+
+    // --- MEJORA: Distinción de botones y anulación ---
+    window.setTool = (t) => { 
+        const buttons = document.querySelectorAll('.tool-btn');
+        
+        // Si se toca la misma herramienta, se desactiva (se vuelve a null)
+        if (tool === t) {
+            tool = null;
+        } else {
+            tool = t;
+        }
+
+        // Actualizar UI: Quitar clase activa a todos y ponerla al seleccionado
+        buttons.forEach(btn => {
+            btn.classList.remove('active-tool');
+            // Buscamos el botón que corresponde a la herramienta 't' para resaltarlo
+            if (tool && btn.getAttribute('onclick').includes(`'${tool}'`)) {
+                btn.classList.add('active-tool');
+            }
+        });
+        console.log("Herramienta activa:", tool);
+    };
 
     const syncCanvasSize = () => {
         if (mathPreview && canvas) {
-            // Guardar dibujo actual antes de redimensionar
             const tempImg = canvas.toDataURL();
-            canvas.width = mathPreview.offsetWidth;
-            canvas.height = mathPreview.offsetHeight;
+            canvas.width = mathPreview.scrollWidth;
+            canvas.height = mathPreview.scrollHeight;
             
-            // Restaurar dibujo tras redimensión
             const img = new Image();
-            img.onload = () => ctx.drawImage(img, 0, 0);
+            img.onload = () => {
+                ctx.drawImage(img, 0, 0);
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+            };
             img.src = tempImg;
-
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
         }
     };
 
@@ -94,17 +116,17 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const startDraw = (e) => {
+        if (!tool) return; // MEJORA: Si tool es null, no hace nada
         drawing = true;
         const pos = getPos(e);
         startX = pos.x; startY = pos.y;
         ctx.beginPath();
         ctx.moveTo(startX, startY);
-        // Evitar scroll en celular al dibujar
         if (e.type === 'touchstart') e.preventDefault();
     };
 
     const draw = (e) => {
-        if (!drawing) return;
+        if (!drawing || !tool) return;
         const pos = getPos(e);
         ctx.strokeStyle = document.getElementById('colorPicker')?.value || '#673ab7';
 
@@ -135,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.stroke();
         }
         drawing = false;
-        saveCanvasToStorage(); // Guardar trazo
+        saveCanvasToStorage(); 
     };
 
     // Listeners Robustos
@@ -146,7 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.addEventListener('touchmove', draw, {passive: false});
     canvas.addEventListener('touchend', stopDraw);
 
-    window.setTool = (t) => { tool = t; };
     window.clearCanvas = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         localStorage.removeItem('canvasStorage');
@@ -182,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ===========================================
-    // PERSISTENCIA (Mantenida + Mejora de Canvas)
+    // PERSISTENCIA
     // ===========================================
     const saveToStorage = () => { 
         if(mathInput) localStorage.setItem('mathStorage', mathInput.innerText); 
@@ -207,10 +228,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     loadFromStorage();
-    setTimeout(syncCanvasSize, 500); // Tiempo para carga de MathJax
+    setTimeout(syncCanvasSize, 500);
 });
 
-// Mantener persistencia de Pages/Headers
 document.addEventListener('input', (e) => {
     const pagesContainer = document.getElementById('pages-container');
     if (pagesContainer) localStorage.setItem('documentContent', pagesContainer.innerHTML);
