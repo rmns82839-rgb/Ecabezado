@@ -5,8 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const redoBtn = document.getElementById('redo-btn');
     const clearBtn = document.getElementById('clear-btn');
     const printMathBtn = document.getElementById('print-math-btn');
-    const exportImgBtn = document.getElementById('export-img-btn');
-    let renderTimer;
+        let renderTimer;
 
     // ===========================================
     // MEJORA: INSERTAR DESDE DESPLEGABLE
