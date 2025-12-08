@@ -153,6 +153,8 @@ body {
     width: 100%;
     overflow: visible; 
     background-color: white;
+    /* MEJORA: Transición suave para cuando la matriz esté lista */
+    transition: opacity 0.3s ease-in-out; 
 }
 
 /* HOJA MILIMETRADA */
@@ -207,6 +209,12 @@ body {
     font-size: 1.8em; color: var(--math-blue); margin-top: 40px; 
 }
 
+/* --- MEJORAS DE MATRIZ PARA IMPRESIÓN Y RENDERIZADO --- */
+#math-preview .mjx-chtml {
+    display: inline-block !important;
+    text-align: center !important;
+}
+
 /* --- RESPONSIVO --- */
 @media (max-width: 600px) {
     .page-container { padding: 15px; border-top-width: 5px; }
@@ -234,13 +242,13 @@ body {
         display: block !important;
         width: 100% !important;
         overflow: visible !important;
+        opacity: 1 !important;
         background-image: linear-gradient(var(--grid-blue) 1px, transparent 1px),
                           linear-gradient(90deg, var(--grid-blue) 1px, transparent 1px) !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
     }
 
-    /* Mantenimiento de estructura de Matrices nxn */
     .mjx-chtml, .MathJax_Display {
         display: inline-block !important;
         width: auto !important;
@@ -248,7 +256,6 @@ body {
         text-align: center !important;
     }
     
-    /* Asegurar que el dibujo del canvas se vea */
     #drawing-canvas {
         z-index: 10;
         visibility: visible !important;
