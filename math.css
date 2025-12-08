@@ -55,7 +55,7 @@ body {
 .builder-group select { 
     padding: 8px 12px; border-radius: 6px; border: 1.5px solid #ced4da; 
     background: white; font-weight: 600; cursor: pointer;
-    font-size: 1em; /* Mejora lectura en móvil */
+    font-size: 1em;
 }
 
 .builder-group select:focus { 
@@ -114,9 +114,10 @@ body {
     text-transform: uppercase; letter-spacing: 1px; display: block;
 }
 
+/* --- MEJORA: CORRECCIÓN DEL PAPEL MILIMETRADO CORTADO --- */
 #math-input, .preview-container {
     min-height: 350px; border: 2px solid #edf2f7; border-radius: 12px; 
-    overflow: hidden; position: relative;
+    position: relative;
 }
 
 #math-input { 
@@ -128,23 +129,22 @@ body {
     overflow-y: auto;
 }
 
-#math-input:focus { 
-    border-color: var(--math-purple); 
-    box-shadow: 0 0 15px var(--glow-purple); 
-}
+#math-input:focus { border-color: var(--math-purple); box-shadow: 0 0 15px var(--glow-purple); }
 
-/* --- CONTENEDOR DE VISTA PREVIA --- */
+/* MEJORA: El contenedor permite scroll para que el canvas y el preview crezcan juntos */
 .preview-container {
     background-color: white;
-    cursor: default;
+    overflow: auto; /* Permite scroll vertical y horizontal */
+    display: block; 
 }
 
+/* MEJORA: El canvas cubre el área total de dibujo */
 #drawing-canvas {
     position: absolute;
     top: 0; left: 0;
     z-index: 10; 
     touch-action: none;
-    pointer-events: auto; /* Asegura capturar dibujo */
+    pointer-events: auto;
 }
 
 #math-preview { 
@@ -153,9 +153,12 @@ body {
     padding: 25px;
     font-size: 1.4em;
     min-height: 100%;
+    width: 100%;
+    overflow: visible; 
+    background-color: white;
 }
 
-/* HOJA MILIMETRADA --- */
+/* HOJA MILIMETRADA --- Mejorada para no cortarse jamás */
 .grid-paper {
     background-image: 
         linear-gradient(var(--grid-blue) 1px, transparent 1px),
@@ -163,6 +166,16 @@ body {
         linear-gradient(var(--grid-blue-strong) 1px, transparent 1px),
         linear-gradient(90deg, var(--grid-blue-strong) 1px, transparent 1px);
     background-size: 15px 15px, 15px 15px, 75px 75px, 75px 75px;
+    background-repeat: repeat; 
+    background-attachment: local;
+}
+
+/* --- NUEVAS MEJORAS: DISTINCIÓN DE HERRAMIENTA ACTIVA --- */
+.tool-btn.active-tool {
+    background-color: var(--math-purple) !important;
+    color: white !important;
+    box-shadow: 0 0 12px var(--glow-purple) !important;
+    transform: translateY(-2px);
 }
 
 /* --- TOOLBAR INFERIOR --- */
@@ -184,15 +197,14 @@ body {
 .back-btn { background: #a0aec0; }
 .save-btn { background: var(--math-purple); }
 
-/* --- SELECTOR DE FORMULAS --- */
+/* Selector de fórmulas */
 .modern-select {
     padding: 10px 14px;
     border-radius: 8px;
     border: 2px solid var(--math-orange);
     background: white;
-    font-family: 'Open Sans', sans-serif;
-    cursor: pointer;
     font-weight: 600;
+    outline: none;
 }
 
 .document-footer .signature { 
