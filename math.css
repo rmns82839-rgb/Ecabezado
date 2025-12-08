@@ -145,3 +145,22 @@ body {
         print-color-adjust: exact;
     }
 }
+.modern-select {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 2px solid #ef6c00;
+    background: white;
+    font-family: 'Open Sans', sans-serif;
+    cursor: pointer;
+    outline: none;
+    max-width: 200px;
+}
+
+.modern-select:focus {
+    box-shadow: 0 0 5px rgba(239, 108, 0, 0.5);
+}
+
+optgroup {
+    font-weight: bold;
+    color: var(--purple);
+}
