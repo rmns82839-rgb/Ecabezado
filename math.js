@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let renderTimer;
 
     // ===========================================
-    // SISTEMA DE HISTORIAL DE DIBUJO (MEJORA)
+    // SISTEMA DE HISTORIAL DE DIBUJO (Mantenido)
     // ===========================================
     let drawHistory = [];
     let historyStep = -1;
@@ -47,10 +47,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===========================================
-    // NUEVAS FUNCIONES DE APOYO
+    // NUEVAS FUNCIONES DE APOYO (Salto de línea mejorado)
     // ===========================================
     window.insertBreak = () => {
-        window.insertMath(' \\\\\\\\ [1.5em] \n');
+        // Mejorado: \newline o \\ solo funcionan bien en entornos alineados
+        window.insertMath(' \\\\ \n ');
     };
 
     window.insertTextNode = () => {
@@ -68,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===========================================
-    // RENDERIZADO MEJORADO
+    // RENDERIZADO MEJORADO (Permite saltos de línea)
     // ===========================================
     const renderMath = () => {
         if (window.MathJax && mathInput && mathPreview) {
@@ -76,7 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (rawContent === "") {
                 mathPreview.textContent = "";
             } else {
-                mathPreview.textContent = `$$ ${rawContent} $$`;
+                // MEJORA: Envolvemos en \begin{aligned} para que \\ funcione como salto de línea real
+                mathPreview.textContent = `$$ \\begin{aligned} ${rawContent} \\end{aligned} $$`;
             }
             if (typeof window.MathJax.typesetPromise === 'function') {
                 window.MathJax.typesetPromise([mathPreview])
@@ -97,7 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 300); 
     };
 
-    // MEJORA: Matrices con 1 y 0
     window.insertDynamicMatrix = () => {
         const rows = document.getElementById('matrix-rows').value;
         const cols = document.getElementById('matrix-cols').value;
@@ -122,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===========================================
-    // SISTEMA DE DIBUJO
+    // SISTEMA DE DIBUJO (Sin cambios)
     // ===========================================
     const canvas = document.getElementById('drawing-canvas'); 
     if (!canvas) return;
