@@ -81,7 +81,14 @@
                     <div class="side-label">CÓDIGO (Rellena los ?)</div>
                     <div id="math-input" contenteditable="true" placeholder="Escribe aquí..."></div>
                 </div>
-
+ <div class="drawing-toolbar">
+    <button onclick="setTool('pen')" class="tool-btn">✏️ Lápiz</button>
+    <button onclick="setTool('highlighter')" class="tool-btn">🖍️ Resaltador</button>
+    <button onclick="setTool('line')" class="tool-btn">📏 Línea</button>
+    <button onclick="setTool('arrow')" class="tool-btn">↗️ Flecha</button>
+    <input type="color" id="colorPicker" value="#673ab7">
+    <button onclick="clearCanvas()" class="tool-btn clear-draw">🗑️ Borrar Dibujo</button>
+ </div>
                 <div class="preview-side">
                     <div class="side-label">VISTA PREVIA (Hoja Milimetrada)</div>
                     <div id="math-preview" class="grid-paper"></div>
