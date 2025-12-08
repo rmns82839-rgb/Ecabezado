@@ -5,9 +5,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const redoBtn = document.getElementById('redo-btn');
     const clearBtn = document.getElementById('clear-btn');
     const printMathBtn = document.getElementById('print-math-btn');
-    const exportImgBtn = document.getElementById('export-img-btn'); // Botón de imagen
+    const exportImgBtn = document.getElementById('export-img-btn');
 
     let renderTimer;
+
+    // ===========================================
+    // NUEVA FUNCIÓN: PROCESAR SELECT DESPLEGABLE
+    // ===========================================
+    window.insertSelectedFormula = () => {
+        const select = document.getElementById('quick-formula-select');
+        if (select && select.value) {
+            // Inserta la fórmula seleccionada usando la lógica de teclado
+            insertMath(select.value);
+            // Resetea el select a la opción inicial
+            select.selectedIndex = 0;
+        }
+    };
 
     // ===========================================
     // RENDERIZADO AUTOMÁTICO (Mejorado)
@@ -30,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===========================================
-    // LÓGICA DE MATRICES NXN DINÁMICAS (Mantenida)
+    // LÓGICA DE MATRICES NXN DINÁMICAS
     // ===========================================
     window.insertDynamicMatrix = () => {
         const rows = document.getElementById('matrix-rows').value;
@@ -48,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===========================================
-    // BOTONES TECLADO (Mantenida)
+    // BOTONES TECLADO
     // ===========================================
     window.insertMath = (symbol) => {
         if (mathInput) {
@@ -59,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===========================================
-    // SISTEMA DE DIBUJO (Touch + Mouse + Storage)
+    // SISTEMA DE DIBUJO
     // ===========================================
     const canvas = document.getElementById('drawing-canvas'); 
     if (!canvas) return;
@@ -161,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===========================================
-    // CORRECCIÓN: GUARDAR FOTO CON FONDO BLANCO
+    // GUARDAR FOTO CON FONDO BLANCO
     // ===========================================
     if (exportImgBtn) {
         exportImgBtn.addEventListener('click', () => {
@@ -170,10 +183,8 @@ document.addEventListener('DOMContentLoaded', () => {
             tempCanvas.width = canvas.width;
             tempCanvas.height = canvas.height;
 
-            // Fondo blanco sólido
             tempCtx.fillStyle = "white";
             tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-            // Pegar el dibujo
             tempCtx.drawImage(canvas, 0, 0);
 
             const link = document.createElement('a');
@@ -184,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ===========================================
-    // ASIGNACIÓN DE EVENTOS RESTANTES
+    // ASIGNACIÓN DE EVENTOS
     // ===========================================
     if(mathInput) {
         mathInput.addEventListener('input', triggerAutoRender);
@@ -211,12 +222,3 @@ document.addEventListener('DOMContentLoaded', () => {
     loadFromStorage();
     setTimeout(syncCanvasSize, 500);
 });
-window.insertSelectedFormula = () => {
-    const select = document.getElementById('quick-formula-select');
-    if (select && select.value) {
-        // Llama a la función insertMath existente con el valor de la opción elegida
-        insertMath(select.value);
-        // Resetea el selector para que el título vuelva a ser visible
-        select.selectedIndex = 0;
-    }
-};
