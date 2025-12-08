@@ -22,16 +22,16 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
-/* --- LOGOTIPO IDaMAr --- */
+/* --- LOGOTIPO IDaMAr (logo.jpg) --- */
 .app-logo { 
     display: block; 
-    width: 90px; height: 90px;
+    width: 95px; height: 95px;
     margin: 0 auto 10px; 
-    border-radius: 50%; 
+    border-radius: 50%; /* Logo perfectamente circular */
     border: 3px solid var(--math-purple);
     object-fit: cover;
     background-color: white;
-    box-shadow: 0 8px 16px rgba(103, 58, 183, 0.2);
+    box-shadow: 0 8px 16px rgba(103, 58, 183, 0.25);
 }
 
 .page-container {
@@ -51,7 +51,6 @@ body {
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
 }
 
-.builder-group label { color: #555; font-size: 0.9em; font-weight: 600; }
 .builder-group select { 
     padding: 8px 12px; border-radius: 6px; border: 1.5px solid #ced4da; 
     background: white; font-weight: 600; cursor: pointer;
@@ -64,23 +63,16 @@ body {
     outline: none; 
 }
 
-/* --- BOTÓN INSERTAR MATRIZ VIBRANTE --- */
+/* --- BOTÓN INSERTAR MATRIZ --- */
 .insert-matrix-btn {
     background: var(--math-purple) !important;
     color: white !important;
-    opacity: 1 !important;
     font-weight: 700 !important;
     padding: 12px 24px !important;
     border-radius: 8px !important;
     box-shadow: 0 4px 12px rgba(103, 58, 183, 0.4) !important;
     border: none !important;
     cursor: pointer;
-}
-
-.insert-matrix-btn:hover {
-    background: #512da8 !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(103, 58, 183, 0.5) !important;
 }
 
 /* --- TECLADO --- */
@@ -99,19 +91,12 @@ body {
 .math-keyboard button:hover {
     background: var(--math-purple);
     color: white;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(103, 58, 183, 0.2);
 }
 
 /* --- EDITOR Y PREVIEW --- */
 .split-editor {
     display: flex; flex-direction: column; 
     gap: 20px; margin-bottom: 20px;
-}
-
-.side-label {
-    font-size: 0.75em; font-weight: 700; color: #777; margin-bottom: 8px;
-    text-transform: uppercase; letter-spacing: 1px; display: block;
 }
 
 #math-input, .preview-container {
@@ -123,13 +108,10 @@ body {
     background: var(--bg-editor); 
     color: #f8f8f2; padding: 20px;
     font-family: 'Fira Code', 'Consolas', monospace; 
-    font-size: 1rem; line-height: 1.6;
-    caret-color: var(--math-green);
-    overflow-y: auto;
+    overflow-y: auto; outline: none;
 }
 
-#math-input:focus { border-color: var(--math-purple); box-shadow: 0 0 15px var(--glow-purple); }
-
+/* --- CAPA DE DIBUJO --- */
 .preview-container {
     background-color: white;
     overflow: auto; 
@@ -153,11 +135,10 @@ body {
     width: 100%;
     overflow: visible; 
     background-color: white;
-    /* MEJORA: Transición suave para cuando la matriz esté lista */
     transition: opacity 0.3s ease-in-out; 
 }
 
-/* HOJA MILIMETRADA */
+/* --- HOJA MILIMETRADA --- */
 .grid-paper {
     background-image: 
         linear-gradient(var(--grid-blue) 1px, transparent 1px),
@@ -169,6 +150,7 @@ body {
     background-attachment: local;
 }
 
+/* --- ESTADO ACTIVO HERRAMIENTAS --- */
 .tool-btn.active-tool {
     background-color: var(--math-purple) !important;
     color: white !important;
@@ -182,37 +164,21 @@ body {
 .modern-btn { 
     padding: 14px 24px; border: none; border-radius: 10px; 
     color: white; cursor: pointer; font-weight: bold; font-size: 0.95em; 
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    display: flex; align-items: center; justify-content: center;
 }
-
-.modern-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
-.modern-btn:active { transform: scale(0.92); }
 
 .edit-btn { background: #5a67d8; }
 .clear-btn { background: #f56565; }
 .print-btn { background: var(--math-green); }
 .back-btn { background: #a0aec0; }
-.save-btn { background: var(--math-purple); }
 
 .modern-select {
-    padding: 10px 14px;
-    border-radius: 8px;
-    border: 2px solid var(--math-orange);
-    background: white;
-    font-weight: 600;
-    outline: none;
+    padding: 10px 14px; border-radius: 8px; border: 2px solid var(--math-orange);
+    background: white; font-weight: 600; outline: none;
 }
 
 .document-footer .signature { 
     text-align: center; font-family: 'Dancing Script', cursive; 
     font-size: 1.8em; color: var(--math-blue); margin-top: 40px; 
-}
-
-/* --- MEJORAS DE MATRIZ PARA IMPRESIÓN Y RENDERIZADO --- */
-#math-preview .mjx-chtml {
-    display: inline-block !important;
-    text-align: center !important;
 }
 
 /* --- RESPONSIVO --- */
@@ -228,28 +194,7 @@ body {
     #math-input, .preview-container { flex: 1; }
 }
 
-/* --- IMPRESIÓN MEJORADA (Mantenimiento de Matrices) --- */
-@media print {
-    /* Mantiene la matriz unida y centrada */
-    .mjx-chtml, .MathJax_Display {
-        display: inline-block !important;
-        width: auto !important;
-        white-space: nowrap !important; /* Evita que los números salten de línea */
-    }
-
-    #math-preview {
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-    }
-
-    /* Asegura que el papel milimetrado se vea con color al imprimir */
-    .grid-paper {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-}
-
+/* --- IMPRESIÓN PROFESIONAL --- */
 @media print {
     @page { margin: 1cm; }
     body { background: white; padding: 0; }
@@ -262,8 +207,6 @@ body {
         border: none !important;
         display: block !important;
         width: 100% !important;
-        overflow: visible !important;
-        opacity: 1 !important;
         background-image: linear-gradient(var(--grid-blue) 1px, transparent 1px),
                           linear-gradient(90deg, var(--grid-blue) 1px, transparent 1px) !important;
         -webkit-print-color-adjust: exact;
