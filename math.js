@@ -14,9 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.insertSelectedFormula = () => {
         const select = document.getElementById('quick-formula-select');
         if (select && select.value) {
-            // Inserta en el editor
             window.insertMath(select.value);
-            // Regresa el select a la opción inicial
             select.selectedIndex = 0;
         }
     };
@@ -26,10 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===========================================
     const renderMath = () => {
         if (window.MathJax && mathInput && mathPreview) {
-            // Sincroniza el texto plano del editor a la vista previa
             mathPreview.textContent = mathInput.innerText;
             
-            // Le pide a MathJax que procese SOLO la vista previa
             if (typeof window.MathJax.typesetPromise === 'function') {
                 window.MathJax.typesetPromise([mathPreview])
                     .then(() => syncCanvasSize())
@@ -68,19 +64,25 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===========================================
-    // BOTONES TECLADO (Mejorado para solo texto plano)
+    // BOTONES TECLADO (Orden Mejorado)
     // ===========================================
     window.insertMath = (symbol) => {
         if (mathInput) {
             mathInput.focus();
-            // Se inserta como texto plano para no renderizar en el editor
+            const range = document.createRange();
+            const sel = window.getSelection();
+            range.selectNodeContents(mathInput);
+            range.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(range);
+
             document.execCommand('insertText', false, ` $${symbol}$ `);
             triggerAutoRender();
         }
     };
 
     // ===========================================
-    // SISTEMA DE DIBUJO (Mantenido)
+    // SISTEMA DE DIBUJO (Mejorado para el área total)
     // ===========================================
     const canvas = document.getElementById('drawing-canvas'); 
     if (!canvas) return;
@@ -103,6 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const syncCanvasSize = () => {
         if (mathPreview && canvas) {
             const tempImg = canvas.toDataURL();
+            // MEJORA CLAVE: Sincroniza con scrollWidth/Height para cubrir todo el papel
             canvas.width = mathPreview.scrollWidth;
             canvas.height = mathPreview.scrollHeight;
             const img = new Image();
@@ -119,7 +122,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const rect = canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        return { x: clientX - rect.left, y: clientY - rect.top };
+        // Calculamos la posición relativa al área de dibujo real
+        return { 
+            x: (clientX - rect.left) * (canvas.width / rect.width), 
+            y: (clientY - rect.top) * (canvas.height / rect.height) 
+        };
     };
 
     const startDraw = (e) => {
@@ -136,6 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!drawing || !tool) return;
         const pos = getPos(e);
         ctx.strokeStyle = document.getElementById('colorPicker')?.value || '#673ab7';
+        
         if (tool === 'pen' || tool === 'highlighter') {
             ctx.globalAlpha = (tool === 'highlighter') ? 0.3 : 1.0;
             ctx.lineWidth = (tool === 'highlighter') ? 15 : 2;
@@ -145,7 +153,29 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.type === 'touchmove') e.preventDefault();
     };
 
-    const stopDraw = () => {
+    // MEJORA: SOPORTE PARA LÍNEAS Y FLECHAS
+    const stopDraw = (e) => {
+        if (!drawing) return;
+        const pos = getPos(e.changedTouches ? e.changedTouches[0] : e);
+
+        if (tool === 'line' || tool === 'arrow') {
+            ctx.strokeStyle = document.getElementById('colorPicker')?.value || '#673ab7';
+            ctx.globalAlpha = 1.0;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(pos.x, pos.y);
+            
+            if (tool === 'arrow') {
+                const angle = Math.atan2(pos.y - startY, pos.x - startX);
+                const headLen = 10;
+                ctx.lineTo(pos.x - headLen * Math.cos(angle - Math.PI/6), pos.y - headLen * Math.sin(angle - Math.PI/6));
+                ctx.moveTo(pos.x, pos.y);
+                ctx.lineTo(pos.x - headLen * Math.cos(angle + Math.PI/6), pos.y - headLen * Math.sin(angle + Math.PI/6));
+            }
+            ctx.stroke();
+        }
+        
         drawing = false;
         saveCanvasToStorage(); 
     };
@@ -163,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===========================================
-    // PERSISTENCIA
+    // PERSISTENCIA MEJORADA
     // ===========================================
     const saveToStorage = () => { if(mathInput) localStorage.setItem('mathStorage', mathInput.innerText); };
     const saveCanvasToStorage = () => { localStorage.setItem('canvasStorage', canvas.toDataURL()); };
@@ -172,12 +202,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const savedText = localStorage.getItem('mathStorage');
         if (savedText && mathInput) { 
             mathInput.innerText = savedText; 
-            setTimeout(renderMath, 800); 
+            renderMath();
         }
+
         const savedImg = localStorage.getItem('canvasStorage');
         if (savedImg) { 
             const img = new Image(); 
-            img.onload = () => ctx.drawImage(img, 0, 0); 
+            img.onload = () => {
+                setTimeout(() => {
+                    syncCanvasSize();
+                    ctx.drawImage(img, 0, 0);
+                }, 1000); 
+            }; 
             img.src = savedImg; 
         }
     };
