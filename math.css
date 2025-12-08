@@ -230,6 +230,27 @@ body {
 
 /* --- IMPRESIÓN MEJORADA (Mantenimiento de Matrices) --- */
 @media print {
+    /* Mantiene la matriz unida y centrada */
+    .mjx-chtml, .MathJax_Display {
+        display: inline-block !important;
+        width: auto !important;
+        white-space: nowrap !important; /* Evita que los números salten de línea */
+    }
+
+    #math-preview {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    /* Asegura que el papel milimetrado se vea con color al imprimir */
+    .grid-paper {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+
+@media print {
     @page { margin: 1cm; }
     body { background: white; padding: 0; }
     .page-container { border: none; box-shadow: none; width: 100%; padding: 0; }
