@@ -211,3 +211,12 @@ document.addEventListener('DOMContentLoaded', () => {
     loadFromStorage();
     setTimeout(syncCanvasSize, 500);
 });
+window.insertSelectedFormula = () => {
+    const select = document.getElementById('quick-formula-select');
+    if (select && select.value) {
+        // Llama a la función insertMath existente con el valor de la opción elegida
+        insertMath(select.value);
+        // Resetea el selector para que el título vuelva a ser visible
+        select.selectedIndex = 0;
+    }
+};
