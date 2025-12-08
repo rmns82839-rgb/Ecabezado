@@ -175,3 +175,15 @@ window.addEventListener('load', () => {
 function openGeoGebra() {
     window.open('https://www.geogebra.org/classic?lang=es', '_blank');
 }
+window.insertSelectedFormula = () => {
+    const select = document.getElementById('quick-formula-select');
+    const formula = select.value;
+    
+    if (formula !== "") {
+        // Utilizamos la función insertMath que ya tienes creada
+        insertMath(formula);
+        
+        // Regresamos el selector a la posición inicial
+        select.selectedIndex = 0;
+    }
+};
