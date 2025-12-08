@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const redoBtn = document.getElementById('redo-btn');
     const clearBtn = document.getElementById('clear-btn');
     const printMathBtn = document.getElementById('print-math-btn');
+    const exportImgBtn = document.getElementById('export-img-btn'); // Botón de imagen
 
     let renderTimer;
 
@@ -64,29 +65,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     let drawing = false;
-    let tool = null; // MEJORA: Se inicializa en null para evitar dibujo accidental
+    let tool = null; 
     let startX, startY;
 
-    // --- MEJORA: Distinción de botones y anulación ---
     window.setTool = (t) => { 
         const buttons = document.querySelectorAll('.tool-btn');
-        
-        // Si se toca la misma herramienta, se desactiva (se vuelve a null)
-        if (tool === t) {
-            tool = null;
-        } else {
-            tool = t;
-        }
+        if (tool === t) { tool = null; } else { tool = t; }
 
-        // Actualizar UI: Quitar clase activa a todos y ponerla al seleccionado
         buttons.forEach(btn => {
             btn.classList.remove('active-tool');
-            // Buscamos el botón que corresponde a la herramienta 't' para resaltarlo
             if (tool && btn.getAttribute('onclick').includes(`'${tool}'`)) {
                 btn.classList.add('active-tool');
             }
         });
-        console.log("Herramienta activa:", tool);
     };
 
     const syncCanvasSize = () => {
@@ -109,14 +100,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const rect = canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        return { 
-            x: clientX - rect.left, 
-            y: clientY - rect.top 
-        };
+        return { x: clientX - rect.left, y: clientY - rect.top };
     };
 
     const startDraw = (e) => {
-        if (!tool) return; // MEJORA: Si tool es null, no hace nada
+        if (!tool) return; 
         drawing = true;
         const pos = getPos(e);
         startX = pos.x; startY = pos.y;
@@ -160,7 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
         saveCanvasToStorage(); 
     };
 
-    // Listeners Robustos
     canvas.addEventListener('mousedown', startDraw);
     canvas.addEventListener('mousemove', draw);
     window.addEventListener('mouseup', stopDraw);
@@ -174,64 +161,53 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===========================================
-    // ASIGNACIÓN DE EVENTOS (Mantenida)
+    // CORRECCIÓN: GUARDAR FOTO CON FONDO BLANCO
     // ===========================================
-    if(mathInput) {
-        mathInput.addEventListener('input', triggerAutoRender);
-        mathInput.addEventListener('paste', (e) => {
-            e.preventDefault();
-            const text = e.clipboardData.getData('text/plain');
-            document.execCommand('insertText', false, text);
+    if (exportImgBtn) {
+        exportImgBtn.addEventListener('click', () => {
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+
+            // Fondo blanco sólido
+            tempCtx.fillStyle = "white";
+            tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            // Pegar el dibujo
+            tempCtx.drawImage(canvas, 0, 0);
+
+            const link = document.createElement('a');
+            link.download = `Matriz_IDaMAr_${Date.now()}.png`;
+            link.href = tempCanvas.toDataURL("image/png");
+            link.click();
         });
     }
 
+    // ===========================================
+    // ASIGNACIÓN DE EVENTOS RESTANTES
+    // ===========================================
+    if(mathInput) {
+        mathInput.addEventListener('input', triggerAutoRender);
+    }
     if(undoBtn) undoBtn.addEventListener('click', () => { mathInput.focus(); document.execCommand('undo'); triggerAutoRender(); });
     if(redoBtn) redoBtn.addEventListener('click', () => { mathInput.focus(); document.execCommand('redo'); triggerAutoRender(); });
-    
     if(clearBtn) clearBtn.addEventListener('click', () => { 
-        if(confirm("¿Limpiar todo?")) { 
-            mathInput.innerText = ''; 
-            window.clearCanvas();
-            localStorage.removeItem('mathStorage'); 
-            renderMath(); 
-        } 
+        if(confirm("¿Limpiar todo?")) { mathInput.innerText = ''; window.clearCanvas(); localStorage.removeItem('mathStorage'); renderMath(); } 
     });
-
-    if(printMathBtn) printMathBtn.addEventListener('click', () => { 
-        renderMath(); 
-        setTimeout(() => window.print(), 500); 
-    });
+    if(printMathBtn) printMathBtn.addEventListener('click', () => { renderMath(); setTimeout(() => window.print(), 500); });
 
     // ===========================================
     // PERSISTENCIA
     // ===========================================
-    const saveToStorage = () => { 
-        if(mathInput) localStorage.setItem('mathStorage', mathInput.innerText); 
-    };
-
-    const saveCanvasToStorage = () => {
-        localStorage.setItem('canvasStorage', canvas.toDataURL());
-    };
-
+    const saveToStorage = () => { if(mathInput) localStorage.setItem('mathStorage', mathInput.innerText); };
+    const saveCanvasToStorage = () => { localStorage.setItem('canvasStorage', canvas.toDataURL()); };
     const loadFromStorage = () => {
         const savedText = localStorage.getItem('mathStorage');
-        if (savedText && mathInput) {
-            mathInput.innerText = savedText;
-            renderMath();
-        }
+        if (savedText && mathInput) { mathInput.innerText = savedText; renderMath(); }
         const savedImg = localStorage.getItem('canvasStorage');
-        if (savedImg) {
-            const img = new Image();
-            img.onload = () => ctx.drawImage(img, 0, 0);
-            img.src = savedImg;
-        }
+        if (savedImg) { const img = new Image(); img.onload = () => ctx.drawImage(img, 0, 0); img.src = savedImg; }
     };
 
     loadFromStorage();
     setTimeout(syncCanvasSize, 500);
-});
-
-document.addEventListener('input', (e) => {
-    const pagesContainer = document.getElementById('pages-container');
-    if (pagesContainer) localStorage.setItem('documentContent', pagesContainer.innerHTML);
 });
