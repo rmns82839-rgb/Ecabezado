@@ -176,31 +176,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===========================================
     // GUARDAR FOTO CON FONDO BLANCO
     // ===========================================
-// --- CORRECCIÓN: GUARDAR FOTO COMBINANDO CAPAS ---
-if (exportImgBtn) {
-    exportImgBtn.addEventListener('click', () => {
-        // 1. Crear canvas temporal
-        const tempCanvas = document.createElement('canvas');
-        const tempCtx = tempCanvas.getContext('2d');
-        tempCanvas.width = canvas.width;
-        tempCanvas.height = canvas.height;
+    if (exportImgBtn) {
+        exportImgBtn.addEventListener('click', () => {
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
 
-        // 2. Pintar fondo blanco sólido
-        tempCtx.fillStyle = "white";
-        tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            tempCtx.fillStyle = "white";
+            tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            tempCtx.drawImage(canvas, 0, 0);
 
-        // 3. Dibujar dibujo del lápiz
-        tempCtx.drawImage(canvas, 0, 0);
-
-        // 4. Descargar
-        const link = document.createElement('a');
-        link.download = `Matriz_Laboratorio_${Date.now()}.png`;
-        link.href = tempCanvas.toDataURL("image/png");
-        link.click();
-        
-        alert("Imagen guardada. Nota: Para incluir las fórmulas matemáticas en la foto, usa la función 'Imprimir PDF' y selecciona 'Guardar como imagen' en tu celular.");
-    });
-}
+            const link = document.createElement('a');
+            link.download = `Matriz_IDaMAr_${Date.now()}.png`;
+            link.href = tempCanvas.toDataURL("image/png");
+            link.click();
+        });
+    }
 
     // ===========================================
     // ASIGNACIÓN DE EVENTOS
