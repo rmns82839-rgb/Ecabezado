@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let renderTimer;
 
     // ===========================================
-    // SISTEMA DE HISTORIAL DE DIBUJO (Mantenido)
+    // SISTEMA DE HISTORIAL DE DIBUJO
     // ===========================================
     let drawHistory = [];
     let historyStep = -1;
@@ -47,18 +47,17 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===========================================
-    // NUEVAS FUNCIONES DE APOYO (Salto de línea mejorado)
+    // NUEVAS FUNCIONES DE APOYO
     // ===========================================
     window.insertBreak = () => {
-        // Mejorado: \newline o \\ solo funcionan bien en entornos alineados
         window.insertMath(' \\\\ \n ');
     };
 
     window.insertTextNode = () => {
-        const userText = prompt("Escribe el texto informativo:", "Resultado:");
-        if (userText) window.insertMath(`\\text{ ${userText.trim()} } `);
+        window.insertMath(`\\text{ Resultado: } `);
     };
 
+    // REVERTIDO: Rellena automáticamente con 0
     window.insertSelectedFormula = () => {
         const select = document.getElementById('quick-formula-select');
         if (select && select.value) {
@@ -69,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===========================================
-    // RENDERIZADO MEJORADO (Permite saltos de línea)
+    // RENDERIZADO MEJORADO
     // ===========================================
     const renderMath = () => {
         if (window.MathJax && mathInput && mathPreview) {
@@ -77,7 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (rawContent === "") {
                 mathPreview.textContent = "";
             } else {
-                // MEJORA: Envolvemos en \begin{aligned} para que \\ funcione como salto de línea real
                 mathPreview.textContent = `$$ \\begin{aligned} ${rawContent} \\end{aligned} $$`;
             }
             if (typeof window.MathJax.typesetPromise === 'function') {
@@ -99,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 300); 
     };
 
+    // REVERTIDO: Genera matriz binaria (1 y 0) automáticamente
     window.insertDynamicMatrix = () => {
         const rows = document.getElementById('matrix-rows').value;
         const cols = document.getElementById('matrix-cols').value;
@@ -123,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===========================================
-    // SISTEMA DE DIBUJO (Sin cambios)
+    // SISTEMA DE DIBUJO
     // ===========================================
     const canvas = document.getElementById('drawing-canvas'); 
     if (!canvas) return;
@@ -259,47 +258,16 @@ document.addEventListener('DOMContentLoaded', () => {
     loadFromStorage();
     if(mathInput) mathInput.addEventListener('input', triggerAutoRender);
 });
-// ===========================================
-// NUEVAS FUNCIONES DE ESTILO DE RESULTADO
-// ===========================================
 
-// Enmarcar el resultado (Crea un cuadro alrededor)
+// ===========================================
+// FUNCIONES DE ESTILO DE RESULTADO
+// ===========================================
 window.boxResult = () => {
-    const userValue = prompt("Escribe el resultado a enmarcar:", "x = 5");
-    if (userValue) window.insertMath(`\\boxed{ ${userValue.trim()} } `);
+    window.insertMath(`\\boxed{ Resultado } `);
 };
-
-// Poner en negrita matemática
 window.boldResult = () => {
-    const userValue = prompt("Escribe el texto para poner en negrita:", "Solución");
-    if (userValue) window.insertMath(`\\mathbf{ ${userValue.trim()} } `);
+    window.insertMath(`\\mathbf{ Resultado } `);
 };
-
-// Cambiar color al resultado (Azul por defecto, puedes cambiarlo)
 window.colorResult = () => {
-    const userValue = prompt("Escribe el resultado para colorear:", "x = 10");
-    if (userValue) window.insertMath(`\\color{blue}{ ${userValue.trim()} } `);
-};
-
-// ===========================================
-// ACTUALIZACIÓN DEL RENDER (Manteniendo el aligned)
-// ===========================================
-const renderMath = () => {
-    if (window.MathJax && mathInput && mathPreview) {
-        let rawContent = mathInput.innerText.replace(/\u00a0/g, ' ').trim();
-        if (rawContent === "") {
-            mathPreview.textContent = "";
-        } else {
-            // El entorno aligned permite que los marcos y colores se vean bien
-            mathPreview.textContent = `$$ \\begin{aligned} ${rawContent} \\end{aligned} $$`;
-        }
-        if (typeof window.MathJax.typesetPromise === 'function') {
-            window.MathJax.typesetPromise([mathPreview])
-                .then(() => syncCanvasSize())
-                .catch((err) => console.log("Error MathJax:", err));
-        } else {
-            window.MathJax.typeset([mathPreview]);
-            syncCanvasSize();
-        }
-    }
+    window.insertMath(`\\color{blue}{ Resultado } `);
 };
