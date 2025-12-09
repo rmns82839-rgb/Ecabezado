@@ -1,27 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // === DOM REFERENCES ===
     const mathInput = document.getElementById('math-input');
     const mathPreview = document.getElementById('math-preview');
     const undoBtn = document.getElementById('undo-btn');
     const redoBtn = document.getElementById('redo-btn');
     const clearBtn = document.getElementById('clear-btn');
     const printMathBtn = document.getElementById('print-math-btn');
-    
-    // SISTEMA DE DIBUJO
-    const canvas = document.getElementById('drawing-canvas'); 
-    
-    // CRÍTICO: Manejar el caso si el canvas no existe.
-    if (!canvas) {
-        console.error("Error: Elemento 'drawing-canvas' no encontrado.");
-        return;
-    }
-    const ctx = canvas.getContext('2d');
-    
     let renderTimer;
-    let drawing = false;
-    let tool = null; 
-    let startX, startY;
-
 
     // ===========================================
     // SISTEMA DE HISTORIAL DE DIBUJO
@@ -35,35 +19,30 @@ document.addEventListener('DOMContentLoaded', () => {
         drawHistory.push(canvas.toDataURL());
     };
 
-    const restoreDrawState = (step) => {
-         if (step >= -1 && step < drawHistory.length) {
-            historyStep = step;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            if (historyStep >= 0) {
-                 let img = new Image();
-                 img.src = drawHistory[historyStep];
-                 img.onload = () => {
-                     ctx.drawImage(img, 0, 0);
-                     saveCanvasToStorage(); // Guarda el estado restaurado
-                 };
-            } else {
-                 saveCanvasToStorage(); // Guarda el estado vacío
-            }
-         }
-    };
-
-
     window.undoDraw = () => {
         if (historyStep > 0) {
-            restoreDrawState(historyStep - 1);
+            historyStep--;
+            let img = new Image();
+            img.src = drawHistory[historyStep];
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+            };
         } else if (historyStep === 0) {
-            restoreDrawState(-1);
+            historyStep = -1;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
     };
 
     window.redoDraw = () => {
         if (historyStep < drawHistory.length - 1) {
-             restoreDrawState(historyStep + 1);
+            historyStep++;
+            let img = new Image();
+            img.src = drawHistory[historyStep];
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+            };
         }
     };
 
@@ -120,8 +99,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // REVERTIDO: Genera matriz binaria (1 y 0) automáticamente
     window.insertDynamicMatrix = () => {
-        const rows = document.getElementById('matrix-rows')?.value || 2;
-        const cols = document.getElementById('matrix-cols')?.value || 2;
+        const rows = document.getElementById('matrix-rows').value;
+        const cols = document.getElementById('matrix-cols').value;
         let latex = '\\begin{pmatrix} ';
         for (let i = 0; i < rows; i++) {
             for (let j = 0; j < cols; j++) {
@@ -143,31 +122,31 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===========================================
-    // SISTEMA DE DIBUJO (Funciones corregidas)
+    // SISTEMA DE DIBUJO
     // ===========================================
+    const canvas = document.getElementById('drawing-canvas'); 
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+    let tool = null; 
+    let startX, startY;
 
     window.setTool = (t) => { 
         const buttons = document.querySelectorAll('.tool-btn');
         if (tool === t) { tool = null; } else { tool = t; }
         buttons.forEach(btn => {
             btn.classList.remove('active-tool');
-            if (tool && btn.getAttribute('onclick')?.includes(`'${tool}'`)) {
+            if (tool && btn.getAttribute('onclick').includes(`'${tool}'`)) {
                 btn.classList.add('active-tool');
             }
         });
     };
 
-    /**
-     * CRÍTICO: Sincroniza el tamaño del canvas con el contenido MathJax.
-     * Exportada para el evento beforeprint.
-     */
     const syncCanvasSize = () => {
         if (mathPreview && canvas) {
             const tempImg = canvas.toDataURL();
-            // Usamos scrollWidth/scrollHeight para capturar el tamaño completo de la fórmula
-            canvas.width = mathPreview.scrollWidth || mathPreview.offsetWidth; 
-            canvas.height = mathPreview.scrollHeight || mathPreview.offsetHeight;
-            
+            canvas.width = mathPreview.scrollWidth;
+            canvas.height = mathPreview.scrollHeight;
             const img = new Image();
             img.onload = () => {
                 ctx.drawImage(img, 0, 0);
@@ -175,20 +154,14 @@ document.addEventListener('DOMContentLoaded', () => {
             img.src = tempImg;
         }
     };
-    window.syncCanvasSize = syncCanvasSize; // Exportada globalmente
 
     const getPos = (e) => {
         const rect = canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        
-        // CRÍTICO: Corrección de escala para pantallas móviles/zoom
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-
         return { 
-            x: (clientX - rect.left) * scaleX, 
-            y: (clientY - rect.top) * scaleY 
+            x: (clientX - rect.left) * (canvas.width / rect.width), 
+            y: (clientY - rect.top) * (canvas.height / rect.height) 
         };
     };
 
@@ -214,28 +187,22 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.lineTo(pos.x, pos.y);
             ctx.stroke();
         }
-        // Dejamos e.preventDefault() aquí, ya que passive: false en el listener lo permite
         if (e.type === 'touchmove') e.preventDefault();
-    };
-
-    const drawArrowHead = (angle, x, y, headLen = 10) => {
-        ctx.lineTo(x - headLen * Math.cos(angle - Math.PI/6), y - headLen * Math.sin(angle - Math.PI/6));
-        ctx.moveTo(x, y);
-        ctx.lineTo(x - headLen * Math.cos(angle + Math.PI/6), y - headLen * Math.sin(angle + Math.PI/6));
     };
 
     const stopDraw = (e) => {
         if (!drawing) return;
-        const finalEvent = e.changedTouches ? e.changedTouches[0] : e;
-        const pos = getPos(finalEvent);
-
+        const pos = getPos(e.changedTouches ? e.changedTouches[0] : e);
         if (tool === 'line' || tool === 'arrow') {
             ctx.strokeStyle = document.getElementById('colorPicker')?.value || '#673ab7';
             ctx.globalAlpha = 1.0; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(pos.x, pos.y);
             if (tool === 'arrow') {
                 const angle = Math.atan2(pos.y - startY, pos.x - startX);
-                drawArrowHead(angle, pos.x, pos.y);
+                const headLen = 10;
+                ctx.lineTo(pos.x - headLen * Math.cos(angle - Math.PI/6), pos.y - headLen * Math.sin(angle - Math.PI/6));
+                ctx.moveTo(pos.x, pos.y);
+                ctx.lineTo(pos.x - headLen * Math.cos(angle + Math.PI/6), pos.y - headLen * Math.sin(angle + Math.PI/6));
             }
             ctx.stroke();
         }
@@ -250,7 +217,6 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.addEventListener('touchstart', startDraw, {passive: false});
     canvas.addEventListener('touchmove', draw, {passive: false});
     canvas.addEventListener('touchend', stopDraw);
-    canvas.addEventListener('touchcancel', stopDraw); // Añadido para robustez
 
     window.clearCanvas = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -269,12 +235,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (savedImg) { 
             const img = new Image(); 
             img.onload = () => { 
-                // CRÍTICO: Aumentar el tiempo para que MathJax se asiente
-                setTimeout(() => { syncCanvasSize(); ctx.drawImage(img, 0, 0); saveDrawState(); }, 1200); 
+                setTimeout(() => { syncCanvasSize(); ctx.drawImage(img, 0, 0); saveDrawState(); }, 1000); 
             }; 
             img.src = savedImg; 
-        } else {
-             setTimeout(syncCanvasSize, 500);
         }
     };
 
@@ -290,23 +253,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if(clearBtn) clearBtn.onclick = () => { 
         if(confirm("¿Limpiar todo?")) { mathInput.innerText = ''; window.clearCanvas(); localStorage.removeItem('mathStorage'); renderMath(); } 
     };
-    
-    // CRÍTICO: Solución de Impresión (Eliminación de setTimeout)
-    if(printMathBtn) printMathBtn.onclick = () => { 
-        renderMath(); // Asegura el último renderizado
-        window.syncCanvasSize(); // Sincroniza el canvas al tamaño final
-        window.print(); // Ejecuta la impresión inmediatamente
-    };
-    
-    // CRÍTICO: Evento para asegurar la sincronización del canvas justo antes de imprimir
-    window.addEventListener('beforeprint', window.syncCanvasSize);
+    if(printMathBtn) printMathBtn.onclick = () => { renderMath(); setTimeout(() => window.print(), 500); };
 
     loadFromStorage();
     if(mathInput) mathInput.addEventListener('input', triggerAutoRender);
-    
-    // Sincronización al redimensionar la ventana (ej. rotación de móvil)
-    window.addEventListener('resize', syncCanvasSize);
-    setTimeout(syncCanvasSize, 50); // Sincronización inicial rápida
 });
 
 // ===========================================
