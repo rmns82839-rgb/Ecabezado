@@ -6,32 +6,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const redoBtn = document.getElementById('redo-btn');
     const clearBtn = document.getElementById('clear-btn');
     const printMathBtn = document.getElementById('print-math-btn');
+    
+    // SISTEMA DE DIBUJO
     const canvas = document.getElementById('drawing-canvas'); 
     
-    // Validar si el canvas existe
+    // CRÍTICO: Manejar el caso si el canvas no existe.
     if (!canvas) {
         console.error("Error: Elemento 'drawing-canvas' no encontrado.");
         return;
     }
     const ctx = canvas.getContext('2d');
+    
     let renderTimer;
+    let drawing = false;
+    let tool = null; 
+    let startX, startY;
+
 
     // ===========================================
     // SISTEMA DE HISTORIAL DE DIBUJO
     // ===========================================
     let drawHistory = [];
     let historyStep = -1;
-    let tool = null;
-    let drawing = false;
-    let startX, startY;
 
     const saveDrawState = () => {
         historyStep++;
         if (historyStep < drawHistory.length) drawHistory.length = historyStep;
-        // Solo guardar si hay algo en el canvas (o si es el primer paso)
-        if (historyStep === 0 || drawHistory.length > 0) {
-             drawHistory.push(canvas.toDataURL());
-        }
+        drawHistory.push(canvas.toDataURL());
     };
 
     const restoreDrawState = (step) => {
@@ -43,10 +44,10 @@ document.addEventListener('DOMContentLoaded', () => {
                  img.src = drawHistory[historyStep];
                  img.onload = () => {
                      ctx.drawImage(img, 0, 0);
-                     saveCanvasToStorage();
+                     saveCanvasToStorage(); // Guarda el estado restaurado
                  };
             } else {
-                 saveCanvasToStorage(); // Guardar canvas vacío
+                 saveCanvasToStorage(); // Guarda el estado vacío
             }
          }
     };
@@ -96,12 +97,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (rawContent === "") {
                 mathPreview.textContent = "";
             } else {
-                // Usa $$ para display mode y \begin{aligned} para permitir múltiples líneas
                 mathPreview.textContent = `$$ \\begin{aligned} ${rawContent} \\end{aligned} $$`;
             }
             if (typeof window.MathJax.typesetPromise === 'function') {
                 window.MathJax.typesetPromise([mathPreview])
-                    .then(() => syncCanvasSize()) // CRÍTICO: Sincroniza DESPUÉS del renderizado
+                    .then(() => syncCanvasSize())
                     .catch((err) => console.log("Error MathJax:", err));
             } else {
                 window.MathJax.typeset([mathPreview]);
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ===========================================
-    // SISTEMA DE DIBUJO
+    // SISTEMA DE DIBUJO (Funciones corregidas)
     // ===========================================
 
     window.setTool = (t) => { 
@@ -151,8 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tool === t) { tool = null; } else { tool = t; }
         buttons.forEach(btn => {
             btn.classList.remove('active-tool');
-            // Usamos startsWith para hacer el match más robusto
-            if (tool && btn.getAttribute('onclick')?.startsWith(`window.setTool('${tool}'`)) {
+            if (tool && btn.getAttribute('onclick')?.includes(`'${tool}'`)) {
                 btn.classList.add('active-tool');
             }
         });
@@ -160,12 +159,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * CRÍTICO: Sincroniza el tamaño del canvas con el contenido MathJax.
-     * Exportada a window para ser llamada por MathJax y el evento beforeprint.
+     * Exportada para el evento beforeprint.
      */
     const syncCanvasSize = () => {
         if (mathPreview && canvas) {
             const tempImg = canvas.toDataURL();
-            
             // Usamos scrollWidth/scrollHeight para capturar el tamaño completo de la fórmula
             canvas.width = mathPreview.scrollWidth || mathPreview.offsetWidth; 
             canvas.height = mathPreview.scrollHeight || mathPreview.offsetHeight;
@@ -177,14 +175,14 @@ document.addEventListener('DOMContentLoaded', () => {
             img.src = tempImg;
         }
     };
-    window.syncCanvasSize = syncCanvasSize; // Exportada para el evento beforeprint
+    window.syncCanvasSize = syncCanvasSize; // Exportada globalmente
 
     const getPos = (e) => {
         const rect = canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
         
-        // CRÍTICO: Corrige la posición del dibujo en pantallas de alta densidad/zoom
+        // CRÍTICO: Corrección de escala para pantallas móviles/zoom
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
 
@@ -192,12 +190,6 @@ document.addEventListener('DOMContentLoaded', () => {
             x: (clientX - rect.left) * scaleX, 
             y: (clientY - rect.top) * scaleY 
         };
-    };
-    
-    const drawArrowHead = (angle, x, y, headLen = 10) => {
-        ctx.lineTo(x - headLen * Math.cos(angle - Math.PI/6), y - headLen * Math.sin(angle - Math.PI/6));
-        ctx.moveTo(x, y);
-        ctx.lineTo(x - headLen * Math.cos(angle + Math.PI/6), y - headLen * Math.sin(angle + Math.PI/6));
     };
 
     const startDraw = (e) => {
@@ -222,31 +214,31 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.lineTo(pos.x, pos.y);
             ctx.stroke();
         }
+        // Dejamos e.preventDefault() aquí, ya que passive: false en el listener lo permite
         if (e.type === 'touchmove') e.preventDefault();
+    };
+
+    const drawArrowHead = (angle, x, y, headLen = 10) => {
+        ctx.lineTo(x - headLen * Math.cos(angle - Math.PI/6), y - headLen * Math.sin(angle - Math.PI/6));
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - headLen * Math.cos(angle + Math.PI/6), y - headLen * Math.sin(angle + Math.PI/6));
     };
 
     const stopDraw = (e) => {
         if (!drawing) return;
-        
-        // Aseguramos que el evento de toque finalice correctamente
         const finalEvent = e.changedTouches ? e.changedTouches[0] : e;
         const pos = getPos(finalEvent);
-        
-        // Redibujar la forma final (línea/flecha)
+
         if (tool === 'line' || tool === 'arrow') {
             ctx.strokeStyle = document.getElementById('colorPicker')?.value || '#673ab7';
             ctx.globalAlpha = 1.0; ctx.lineWidth = 2;
-            ctx.beginPath(); 
-            ctx.moveTo(startX, startY); 
-            ctx.lineTo(pos.x, pos.y);
-            
+            ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(pos.x, pos.y);
             if (tool === 'arrow') {
                 const angle = Math.atan2(pos.y - startY, pos.x - startX);
                 drawArrowHead(angle, pos.x, pos.y);
             }
             ctx.stroke();
         }
-        
         drawing = false; 
         saveDrawState(); 
         saveCanvasToStorage(); 
@@ -258,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.addEventListener('touchstart', startDraw, {passive: false});
     canvas.addEventListener('touchmove', draw, {passive: false});
     canvas.addEventListener('touchend', stopDraw);
-    canvas.addEventListener('touchcancel', stopDraw); // Manejo de cancelación de toque
+    canvas.addEventListener('touchcancel', stopDraw); // Añadido para robustez
 
     window.clearCanvas = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -277,18 +269,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (savedImg) { 
             const img = new Image(); 
             img.onload = () => { 
-                // CRÍTICO: Un pequeño delay para dar tiempo a MathJax/CSS antes de dibujar
-                setTimeout(() => { 
-                    syncCanvasSize(); 
-                    ctx.drawImage(img, 0, 0); 
-                    // Aseguramos que el estado inicial se guarde en el historial
-                    saveDrawState(); 
-                }, 800); 
+                // CRÍTICO: Aumentar el tiempo para que MathJax se asiente
+                setTimeout(() => { syncCanvasSize(); ctx.drawImage(img, 0, 0); saveDrawState(); }, 1200); 
             }; 
             img.src = savedImg; 
         } else {
-             // Si no hay imagen guardada, sincroniza el tamaño de todas formas.
-            setTimeout(syncCanvasSize, 500);
+             setTimeout(syncCanvasSize, 500);
         }
     };
 
@@ -305,23 +291,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if(confirm("¿Limpiar todo?")) { mathInput.innerText = ''; window.clearCanvas(); localStorage.removeItem('mathStorage'); renderMath(); } 
     };
     
-    // CRÍTICO: Solución de Impresión/Alineación
+    // CRÍTICO: Solución de Impresión (Eliminación de setTimeout)
     if(printMathBtn) printMathBtn.onclick = () => { 
-        renderMath(); // Asegura el último renderizado de la fórmula
+        renderMath(); // Asegura el último renderizado
         window.syncCanvasSize(); // Sincroniza el canvas al tamaño final
-        window.print(); // Ejecuta la impresión directamente
+        window.print(); // Ejecuta la impresión inmediatamente
     };
     
-    // CRÍTICO: Evento de Impresión para Sincronización
+    // CRÍTICO: Evento para asegurar la sincronización del canvas justo antes de imprimir
     window.addEventListener('beforeprint', window.syncCanvasSize);
-
 
     loadFromStorage();
     if(mathInput) mathInput.addEventListener('input', triggerAutoRender);
     
-    // Ejecutar una sincronización inicial después de la carga para asegurar dimensiones correctas
+    // Sincronización al redimensionar la ventana (ej. rotación de móvil)
     window.addEventListener('resize', syncCanvasSize);
-    setTimeout(syncCanvasSize, 50);
+    setTimeout(syncCanvasSize, 50); // Sincronización inicial rápida
 });
 
 // ===========================================
