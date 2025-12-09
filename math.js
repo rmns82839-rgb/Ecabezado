@@ -2,145 +2,107 @@ document.addEventListener('DOMContentLoaded', () => {
     // === DOM REFERENCES ===
     const mathInput = document.getElementById('math-input');
     const mathPreview = document.getElementById('math-preview');
-    const canvas = document.getElementById('drawing-canvas'); 
     const undoBtn = document.getElementById('undo-btn');
     const redoBtn = document.getElementById('redo-btn');
     const clearBtn = document.getElementById('clear-btn');
     const printMathBtn = document.getElementById('print-math-btn');
+    const canvas = document.getElementById('drawing-canvas'); 
     
-    // Validar si el canvas existe antes de intentar obtener el contexto
+    // Validar si el canvas existe
     if (!canvas) {
         console.error("Error: Elemento 'drawing-canvas' no encontrado.");
         return;
     }
     const ctx = canvas.getContext('2d');
-
-    // === CONFIGURACIÓN Y ESTADO ===
     let renderTimer;
-    let tool = null; 
+
+    // ===========================================
+    // SISTEMA DE HISTORIAL DE DIBUJO
+    // ===========================================
     let drawHistory = [];
     let historyStep = -1;
-
-    // === DIBUJO Y MANEJO DE HISTORIAL ===
+    let tool = null;
     let drawing = false;
     let startX, startY;
 
-    /**
-     * Sincroniza el tamaño del canvas con el contenido MathJax renderizado.
-     * CRÍTICO para la alineación correcta en impresión.
-     */
-    const syncCanvasSize = () => {
-        if (mathPreview && canvas) {
-            const tempImg = canvas.toDataURL();
-            
-            // 1. Forzar el tamaño del canvas al tamaño actual del contenido
-            canvas.width = mathPreview.scrollWidth || mathPreview.offsetWidth;
-            canvas.height = mathPreview.scrollHeight || mathPreview.offsetHeight;
-            
-            // 2. Redibujar el contenido anterior
-            const img = new Image();
-            img.onload = () => {
-                ctx.drawImage(img, 0, 0);
-            };
-            img.src = tempImg;
-        }
-    };
-    window.syncCanvasSize = syncCanvasSize; // Exponer para MathJax y eventos externos
-
     const saveDrawState = () => {
-        if (tool === null) return; // No guardar si no se estaba dibujando activamente
         historyStep++;
         if (historyStep < drawHistory.length) drawHistory.length = historyStep;
-        drawHistory.push(canvas.toDataURL());
+        // Solo guardar si hay algo en el canvas (o si es el primer paso)
+        if (historyStep === 0 || drawHistory.length > 0) {
+             drawHistory.push(canvas.toDataURL());
+        }
     };
 
     const restoreDrawState = (step) => {
-        if (step >= 0 && step < drawHistory.length) {
+         if (step >= -1 && step < drawHistory.length) {
             historyStep = step;
-            let img = new Image();
-            img.src = drawHistory[historyStep];
-            img.onload = () => {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 0, 0);
-            };
-            saveCanvasToStorage();
-        } else if (step === -1) {
-            historyStep = -1;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            saveCanvasToStorage();
-        }
+            if (historyStep >= 0) {
+                 let img = new Image();
+                 img.src = drawHistory[historyStep];
+                 img.onload = () => {
+                     ctx.drawImage(img, 0, 0);
+                     saveCanvasToStorage();
+                 };
+            } else {
+                 saveCanvasToStorage(); // Guardar canvas vacío
+            }
+         }
     };
+
 
     window.undoDraw = () => {
         if (historyStep > 0) {
             restoreDrawState(historyStep - 1);
         } else if (historyStep === 0) {
-            restoreDrawState(-1); // Limpiar si es el primer paso
+            restoreDrawState(-1);
         }
     };
 
     window.redoDraw = () => {
         if (historyStep < drawHistory.length - 1) {
-            restoreDrawState(historyStep + 1);
+             restoreDrawState(historyStep + 1);
         }
     };
 
-    // === MANEJO DE ENTRADA Y TECLADO ===
-
-    // Función unificada para insertar texto
-    window.insertMath = (symbol) => {
-        if (mathInput) {
-            mathInput.focus();
-            document.execCommand('insertText', false, symbol);
-            triggerAutoRender();
-        }
+    // ===========================================
+    // NUEVAS FUNCIONES DE APOYO
+    // ===========================================
+    window.insertBreak = () => {
+        window.insertMath(' \\\\ \n ');
     };
 
-    // REVERTIDO: Genera matriz binaria (1 y 0) automáticamente
-    window.insertDynamicMatrix = () => {
-        const rows = document.getElementById('matrix-rows')?.value || 2;
-        const cols = document.getElementById('matrix-cols')?.value || 2;
-        let latex = '\\begin{pmatrix} ';
-        for (let i = 0; i < rows; i++) {
-            for (let j = 0; j < cols; j++) {
-                // Alterna entre 1 y 0 para un ejemplo visual
-                latex += ((i + j) % 2 === 0) ? '1' : '0';
-                if (j < cols - 1) latex += ' & ';
-            }
-            if (i < rows - 1) latex += ' \\\\ ';
-        }
-        latex += ' \\end{pmatrix} ';
-        window.insertMath(latex);
+    window.insertTextNode = () => {
+        window.insertMath(`\\text{ Resultado: } `);
     };
-    
+
     // REVERTIDO: Rellena automáticamente con 0
     window.insertSelectedFormula = () => {
         const select = document.getElementById('quick-formula-select');
         if (select && select.value) {
-            // Reemplaza el placeholder '?' con '0' o usa el valor tal cual si no hay '?'
-            const formula = select.value.replace(/\?/g, '0'); 
+            const formula = select.value.replace(/\?/g, '0');
             window.insertMath(formula);
             select.selectedIndex = 0;
         }
     };
 
-    // === FUNCIONES DE APOYO (Mantener tus funciones originales) ===
-    window.insertBreak = () => { window.insertMath(' \\\\ \n '); };
-    window.insertTextNode = () => { window.insertMath(`\\text{ Resultado: } `); };
-
-    // === RENDERIZADO MATHJAX ===
+    // ===========================================
+    // RENDERIZADO MEJORADO
+    // ===========================================
     const renderMath = () => {
         if (window.MathJax && mathInput && mathPreview) {
             let rawContent = mathInput.innerText.replace(/\u00a0/g, ' ').trim();
-            // Asegura que el contenido esté dentro del ambiente 'aligned' para múltiples líneas
-            mathPreview.textContent = rawContent === "" 
-                ? "" 
-                : `$$ \\begin{aligned} ${rawContent} \\end{aligned} $$`;
-
+            if (rawContent === "") {
+                mathPreview.textContent = "";
+            } else {
+                // Usa $$ para display mode y \begin{aligned} para permitir múltiples líneas
+                mathPreview.textContent = `$$ \\begin{aligned} ${rawContent} \\end{aligned} $$`;
+            }
             if (typeof window.MathJax.typesetPromise === 'function') {
                 window.MathJax.typesetPromise([mathPreview])
                     .then(() => syncCanvasSize()) // CRÍTICO: Sincroniza DESPUÉS del renderizado
-                    .catch((err) => console.error("Error MathJax:", err));
+                    .catch((err) => console.log("Error MathJax:", err));
             } else {
                 window.MathJax.typeset([mathPreview]);
                 syncCanvasSize();
@@ -156,35 +118,79 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 300); 
     };
 
-    // === LÓGICA DE HERRAMIENTAS DE DIBUJO ===
+    // REVERTIDO: Genera matriz binaria (1 y 0) automáticamente
+    window.insertDynamicMatrix = () => {
+        const rows = document.getElementById('matrix-rows')?.value || 2;
+        const cols = document.getElementById('matrix-cols')?.value || 2;
+        let latex = '\\begin{pmatrix} ';
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                latex += ((i + j) % 2 === 0) ? '1' : '0';
+                if (j < cols - 1) latex += ' & ';
+            }
+            if (i < rows - 1) latex += ' \\\\ ';
+        }
+        latex += ' \\end{pmatrix} ';
+        window.insertMath(latex);
+    };
+
+    window.insertMath = (symbol) => {
+        if (mathInput) {
+            mathInput.focus();
+            document.execCommand('insertText', false, symbol);
+            triggerAutoRender();
+        }
+    };
+
+    // ===========================================
+    // SISTEMA DE DIBUJO
+    // ===========================================
 
     window.setTool = (t) => { 
         const buttons = document.querySelectorAll('.tool-btn');
-        // Alternar la herramienta
-        if (tool === t) { tool = null; } else { tool = t; } 
-        
-        // Actualizar el estado visual de los botones
+        if (tool === t) { tool = null; } else { tool = t; }
         buttons.forEach(btn => {
             btn.classList.remove('active-tool');
-            if (tool && btn.getAttribute('onclick')?.includes(`'${tool}'`)) {
+            // Usamos startsWith para hacer el match más robusto
+            if (tool && btn.getAttribute('onclick')?.startsWith(`window.setTool('${tool}'`)) {
                 btn.classList.add('active-tool');
             }
         });
     };
 
+    /**
+     * CRÍTICO: Sincroniza el tamaño del canvas con el contenido MathJax.
+     * Exportada a window para ser llamada por MathJax y el evento beforeprint.
+     */
+    const syncCanvasSize = () => {
+        if (mathPreview && canvas) {
+            const tempImg = canvas.toDataURL();
+            
+            // Usamos scrollWidth/scrollHeight para capturar el tamaño completo de la fórmula
+            canvas.width = mathPreview.scrollWidth || mathPreview.offsetWidth; 
+            canvas.height = mathPreview.scrollHeight || mathPreview.offsetHeight;
+            
+            const img = new Image();
+            img.onload = () => {
+                ctx.drawImage(img, 0, 0);
+            };
+            img.src = tempImg;
+        }
+    };
+    window.syncCanvasSize = syncCanvasSize; // Exportada para el evento beforeprint
+
     const getPos = (e) => {
         const rect = canvas.getBoundingClientRect();
-        // Soporte unificado para mouse y toque
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
         
-        // Corrección de escala para monitores de alta densidad (Retina, etc.)
+        // CRÍTICO: Corrige la posición del dibujo en pantallas de alta densidad/zoom
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
 
         return { 
             x: (clientX - rect.left) * scaleX, 
-            y: (clientY - rect.top) * scaleY
+            y: (clientY - rect.top) * scaleY 
         };
     };
     
@@ -199,13 +205,10 @@ document.addEventListener('DOMContentLoaded', () => {
         drawing = true;
         const pos = getPos(e);
         startX = pos.x; startY = pos.y;
-        
-        // Configuración de pincel
         ctx.beginPath();
         ctx.moveTo(startX, startY);
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
-        
         if (e.type === 'touchstart') e.preventDefault();
     };
 
@@ -213,28 +216,28 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!drawing || !tool) return;
         const pos = getPos(e);
         ctx.strokeStyle = document.getElementById('colorPicker')?.value || '#673ab7';
-
         if (tool === 'pen' || tool === 'highlighter') {
             ctx.globalAlpha = (tool === 'highlighter') ? 0.3 : 1.0;
             ctx.lineWidth = (tool === 'highlighter') ? 15 : 2;
             ctx.lineTo(pos.x, pos.y);
             ctx.stroke();
         }
-        
         if (e.type === 'touchmove') e.preventDefault();
     };
-    
+
     const stopDraw = (e) => {
         if (!drawing) return;
-        const pos = getPos(e.changedTouches ? e.changedTouches[0] : e);
-
+        
+        // Aseguramos que el evento de toque finalice correctamente
+        const finalEvent = e.changedTouches ? e.changedTouches[0] : e;
+        const pos = getPos(finalEvent);
+        
+        // Redibujar la forma final (línea/flecha)
         if (tool === 'line' || tool === 'arrow') {
-            // Al dibujar formas, limpiamos el path y redibujamos la línea final
             ctx.strokeStyle = document.getElementById('colorPicker')?.value || '#673ab7';
-            ctx.globalAlpha = 1.0; 
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(startX, startY);
+            ctx.globalAlpha = 1.0; ctx.lineWidth = 2;
+            ctx.beginPath(); 
+            ctx.moveTo(startX, startY); 
             ctx.lineTo(pos.x, pos.y);
             
             if (tool === 'arrow') {
@@ -244,19 +247,18 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.stroke();
         }
         
-        // Fin del proceso
         drawing = false; 
         saveDrawState(); 
         saveCanvasToStorage(); 
     };
 
-    // === EVENT LISTENERS DE DIBUJO ===
     canvas.addEventListener('mousedown', startDraw);
     canvas.addEventListener('mousemove', draw);
     window.addEventListener('mouseup', stopDraw);
     canvas.addEventListener('touchstart', startDraw, {passive: false});
     canvas.addEventListener('touchmove', draw, {passive: false});
     canvas.addEventListener('touchend', stopDraw);
+    canvas.addEventListener('touchcancel', stopDraw); // Manejo de cancelación de toque
 
     window.clearCanvas = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -265,36 +267,31 @@ document.addEventListener('DOMContentLoaded', () => {
         historyStep = -1;
     };
 
-    // === ALMACENAMIENTO LOCAL ===
     const saveToStorage = () => { if(mathInput) localStorage.setItem('mathStorage', mathInput.innerText); };
     const saveCanvasToStorage = () => { localStorage.setItem('canvasStorage', canvas.toDataURL()); };
 
     const loadFromStorage = () => {
         const savedText = localStorage.getItem('mathStorage');
         if (savedText && mathInput) { mathInput.innerText = savedText; renderMath(); }
-        
         const savedImg = localStorage.getItem('canvasStorage');
         if (savedImg) { 
             const img = new Image(); 
             img.onload = () => { 
-                // CRÍTICO: Esperar 1 segundo para que MathJax y el CSS carguen completamente 
-                // antes de dibujar, evitando desalineaciones al cargar.
+                // CRÍTICO: Un pequeño delay para dar tiempo a MathJax/CSS antes de dibujar
                 setTimeout(() => { 
                     syncCanvasSize(); 
                     ctx.drawImage(img, 0, 0); 
+                    // Aseguramos que el estado inicial se guarde en el historial
                     saveDrawState(); 
-                }, 1000); 
+                }, 800); 
             }; 
             img.src = savedImg; 
         } else {
-             // Si no hay dibujo guardado, sincroniza el tamaño de todas formas.
-            setTimeout(syncCanvasSize, 500); 
+             // Si no hay imagen guardada, sincroniza el tamaño de todas formas.
+            setTimeout(syncCanvasSize, 500);
         }
     };
-    
-    // === EVENTOS DE UI ===
-    
-    // Configuración de botones de Deshacer/Rehacer
+
     if(undoBtn) undoBtn.onclick = () => { 
         if(tool) { window.undoDraw(); } 
         else { mathInput.focus(); document.execCommand('undo'); triggerAutoRender(); }
@@ -304,37 +301,38 @@ document.addEventListener('DOMContentLoaded', () => {
         else { mathInput.focus(); document.execCommand('redo'); triggerAutoRender(); }
     };
     
-    // Configuración de botón Limpiar
     if(clearBtn) clearBtn.onclick = () => { 
-        if(confirm("¿Limpiar todo el contenido y dibujo?")) { 
-            mathInput.innerText = ''; 
-            window.clearCanvas(); 
-            localStorage.removeItem('mathStorage'); 
-            renderMath(); 
-        } 
+        if(confirm("¿Limpiar todo?")) { mathInput.innerText = ''; window.clearCanvas(); localStorage.removeItem('mathStorage'); renderMath(); } 
     };
     
-    // Configuración de botón Imprimir (Solución de alineación de Canvas)
+    // CRÍTICO: Solución de Impresión/Alineación
     if(printMathBtn) printMathBtn.onclick = () => { 
-        renderMath(); 
-        // CRÍTICO: Sincronizar justo antes de imprimir
-        syncCanvasSize(); 
-        // Pequeño retraso para que el navegador procese los cambios de MathJax/Canvas
-        setTimeout(() => window.print(), 500); 
+        renderMath(); // Asegura el último renderizado de la fórmula
+        window.syncCanvasSize(); // Sincroniza el canvas al tamaño final
+        window.print(); // Ejecuta la impresión directamente
     };
+    
+    // CRÍTICO: Evento de Impresión para Sincronización
+    window.addEventListener('beforeprint', window.syncCanvasSize);
 
-    // === INICIALIZACIÓN ===
+
     loadFromStorage();
     if(mathInput) mathInput.addEventListener('input', triggerAutoRender);
-
-    // CRÍTICO: Evento de impresión para asegurar la alineación final
-    window.addEventListener('beforeprint', () => {
-        // Doble verificación de sincronización de Canvas/MathJax
-        syncCanvasSize();
-    });
-
-    // === FUNCIONES DE ESTILO DE RESULTADO ===
-    window.boxResult = () => { window.insertMath(`\\boxed{ Resultado } `); };
-    window.boldResult = () => { window.insertMath(`\\mathbf{ Resultado } `); };
-    window.colorResult = () => { window.insertMath(`\\color{blue}{ Resultado } `); };
+    
+    // Ejecutar una sincronización inicial después de la carga para asegurar dimensiones correctas
+    window.addEventListener('resize', syncCanvasSize);
+    setTimeout(syncCanvasSize, 50);
 });
+
+// ===========================================
+// FUNCIONES DE ESTILO DE RESULTADO
+// ===========================================
+window.boxResult = () => {
+    window.insertMath(`\\boxed{ Resultado } `);
+};
+window.boldResult = () => {
+    window.insertMath(`\\mathbf{ Resultado } `);
+};
+window.colorResult = () => {
+    window.insertMath(`\\color{blue}{ Resultado } `);
+};
